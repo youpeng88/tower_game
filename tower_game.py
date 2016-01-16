@@ -245,7 +245,7 @@ def main_loop(screen, board, tower_number, wavecount, money, clock):
             update_text(screen, "Wave #: " + str(wavecount), 3, board.size)
             pygame.display.flip()
             # bring waves of enemies
-            frequency = 100 # in milliseconds
+            frequency = 10 # in milliseconds
             num_enemies = 5 # number of enemies generated per wave
             pygame.time.set_timer(pygame.USEREVENT + 1, frequency)
             if pygame.mouse.get_pressed()[0]: 
