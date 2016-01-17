@@ -90,7 +90,7 @@ def new_game():
     pygame.init() # initialize all imported pygame modules
     
     # setup background
-    BackGround = Background('brick_wall.bmp', [MARGIN,MARGIN])
+    BackGround = Background('brick_wall.jpg', [MARGIN,MARGIN])
 
     screen = pygame.display.set_mode(SCREEN_SIZE)
 
@@ -270,7 +270,7 @@ class Tower(Game_obj):
         self.set_pic()
 
     def set_pic(self):
-        self.image = pygame.image.load("base_tower.bmp").convert_alpha()
+        self.image = pygame.image.load("base_tower.png").convert_alpha()
         self.image = pygame.transform.scale(self.image,(self.dimensions[0], self.dimensions[1]))
 
     def decrease_HP(self,decreased_HP):
@@ -293,7 +293,7 @@ class Defense_tower(Tower):
         self.defense_range = defense_range
 
     def set_pic(self):
-        self.image = pygame.image.load("defense_tower.bmp").convert_alpha()
+        self.image = pygame.image.load("defense_tower.png").convert_alpha()
         self.image = pygame.transform.scale(self.image,(self.dimensions[0], self.dimensions[1]))
 
     def closest_enemy(self, board):
@@ -334,7 +334,7 @@ class Enemies(Game_obj):
         self.dy = self.speed_level*(self.orientation[1])
 
     def set_pic(self):
-        self.image = pygame.image.load("enemy.bmp").convert_alpha()
+        self.image = pygame.image.load("enemy.jpg").convert_alpha()
         self.image = pygame.transform.scale(self.image,(self.dimensions[0], self.dimensions[1]))
 
     def set_new_speed(self,new_level):
