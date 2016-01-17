@@ -33,27 +33,28 @@ MAP_SIZE = (600, 600)  # (width in pixels, height in pixels)
 MARGIN = 10
 
 # screen size
-SCREEN_SIZE = (1000, MAP_SIZE[1]+2*MARGIN)  # (width in pixels, height in pixels)
+SCREEN_SIZE = (MAP_SIZE[1]+2*MARGIN,680)  # (width in pixels, height in pixels)
 
 # bar_size
-BAR_SIZE = (SCREEN_SIZE[0]-3*MARGIN-MAP_SIZE[0],MAP_SIZE[1])
+BAR_SIZE = (MAP_SIZE[0],SCREEN_SIZE[1]-3*MARGIN-MAP_SIZE[0],)
 
 # default dimensions
 DIMENSIONS = (20,20)
 
 # PC Dictionary relating object type to the image files it uses and its dimensions
-IMAGE_DICT = {}
-IMAGE_DICT["base_tower"] = ("base_tower.png", (20, 40))
-IMAGE_DICT["defense_tower"] = ("defense_tower.png", (20, 20))
-IMAGE_DICT["enemy"] = ("enemy.png", (20, 20))
-IMAGE_DICT["background"] = ("brick_wall.png", MAP_SIZE)
+#IMAGE_DICT = {}
+#IMAGE_DICT["base_tower"] = ("base_tower.png", (20, 40))
+#IMAGE_DICT["defense_tower"] = ("defense_tower.png", (20, 20))
+#IMAGE_DICT["enemy"] = ("enemy.png", (20, 20))
+#IMAGE_DICT["background"] = ("brick_wall.png", MAP_SIZE)
 
-# # MAC Dictionary relating object type to the image files it uses and its dimensions
-# IMAGE_DICT = {}
-# IMAGE_DICT["base_tower"] = ("base_tower.bmp", (20, 40))
-# IMAGE_DICT["defense_tower"] = ("defense_tower.bmp", (20, 20))
-# IMAGE_DICT["enemy"] = ("enemy.bmp", (20, 20))
-# IMAGE_DICT["background"] = ("brick_wall.bmp", MAP_SIZE)
+# MAC Dictionary relating object type to the image files it uses and its dimensions
+IMAGE_DICT = {}
+IMAGE_DICT["base_tower"] = ("base_tower.bmp", (20, 40))
+IMAGE_DICT["defense_tower"] = ("defense_tower.bmp", (20, 20))
+IMAGE_DICT["enemy"] = ("enemy.bmp", (20, 20))
+IMAGE_DICT["background"] = ("brick_wall.bmp", MAP_SIZE)
+IMAGE_DICT["gold_icon"] = 
 
 
 def map_border():
@@ -85,11 +86,11 @@ def update_text(screen, message, location):
     """
     textSize = 20
     font = pygame.font.Font(None, 20)
-    textY = 0 + textSize
+    textx = 0 + textSize
     text = font.render(message, True, white, black)
     textRect = text.get_rect()
-    textRect.centerx = 2*MARGIN + MAP_SIZE[0] + BAR_SIZE[0]/2
-    textRect.centery = MARGIN+100+textY*location*2
+    textRect.centery = 2*MARGIN + MAP_SIZE[1] + BAR_SIZE[1]/2
+    textRect.centerx = MARGIN+50+textx*(location-1)*8
     screen.blit(text, textRect)
 
 def sidebar(screen, tower_number, money, wavecount):
@@ -148,6 +149,7 @@ def main_loop(screen, board, starting_varaibles, clock):
     tower_cost = starting_varaibles[7]
     attack_power = starting_varaibles[8]
 
+    #background = pygame.Surface((screen.get_width(), screen.get_height()))
     board.towers.draw(screen) # draw tower Sprite
     pygame.display.flip()
     
@@ -189,13 +191,14 @@ def main_loop(screen, board, starting_varaibles, clock):
                  if board.add_enemy_to_board((x,y),speed_level, HP_enemy, attack_power):
                      enemies_count +=1
              wavecount +=1
-             # action 3: defense attacks enemy (shoot)
+        # action 3: defense attacks enemy (shoot)
              # increase money when enemy died
     
-             # action 4: enemy attack defense and base tower
+        # action 4: enemy attack defense and base tower
     
-             # action 5: enemies move
+        # action 5: enemies move
          # test movement: board.add_enemy_to_board((11,11),speed_level, HP_enemy)
+         #board.enemies.clear(screen,background)
          board.enemies.update(seconds)
          board.enemies.draw(screen)
          pygame.display.flip()
@@ -309,10 +312,6 @@ class Defense_tower(Tower):
         self.collison = False
         self.defense_range = defense_range
 
-    def set_pic(self):
-        self.image = pygame.image.load("defense_tower.bmp").convert_alpha()
-        self.image = pygame.transform.scale(self.image,(self.dimensions[0], self.dimensions[1]))
-
     def closest_enemy(self, board):
         e_position = None
         closest_distance = self.defense_range
@@ -333,7 +332,7 @@ class Enemies(Game_obj):
         self.attack_power = attack_power
         self.dx = 0
         self.dy = 0
-        self.point_at_base()
+        self.point_at_base(board)
 
     def point_at_base(self, board): # moving direction
         direction = (board.base_tower.position[0] - self.position[0], board.base_tower.position[1] - self.position[1])
@@ -349,8 +348,6 @@ class Enemies(Game_obj):
         self.dx = self.speed_level*(self.orientation[0])
         self.dy = self.speed_level*(self.orientation[1])
 
-
-
     def set_new_speed(self,new_level):
         self.speed_level = 1*new_level
 
@@ -365,6 +362,7 @@ class Enemies(Game_obj):
         self.board.enemy_dict[(self.position[0], self.position[1])] = None
         # from sprite group
         self.kill()
+        
     def touching_defense_or_base_tower(self, board):
         collision = self.spritecollideany(self, board.towers, collided=None)
         if collision is not None:
