@@ -325,9 +325,9 @@ class Enemies(Game_obj):
         self.speed_level = 1*level
         
         self.orientation = (0,1) #points up initially
+        self.dx = 1
+        self.dy = 1
         self.point_at_base(board)
-        self.position = position
-
 
     def point_at_base(self, board): # moving direction
         direction = (board.base_tower.position[0] - self.position[0], board.base_tower.position[1] - self.position[1])
