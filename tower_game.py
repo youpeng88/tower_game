@@ -113,7 +113,7 @@ def new_game():
 
     starting_varaibles = [HP_enemy, HP_tower, speed_level, tower_number, wavecount, money, defense_range]
 
-    board = Board(HP_base)
+    board = Board(HP_base,screen)
 
     clock = pygame.time.Clock()
 
@@ -175,10 +175,16 @@ def main_loop(screen, board, starting_varaibles, clock):
              # action 5: enemies move
              board.enemies.update(seconds)
              board.enemies.draw(screen)
+
+##             board.lifebars.update_position()
+             
              pygame.display.flip()
+
+             
     
          events = pygame.event.get()
          event_types = [event.type for event in events] # update event list
+         
          pass
 
 class Background(pygame.sprite.Sprite):
@@ -190,24 +196,31 @@ class Background(pygame.sprite.Sprite):
         self.rect.left, self.rect.top = location
 
 class Board:
-    def __init__(self, HP_base):
+    def __init__(self, HP_base,screen):
 
+        self.screen = screen
+        
         # Initialize the base Tower
         init_x = MARGIN+MAP_SIZE[0]/2
         init_y = MARGIN+MAP_SIZE[1]/2
         self.base_tower = Tower(self,(init_x, init_y),(20,40), HP_base)
+        self.base_tower_lifebar = Lifebar(self,self.base_tower,screen, HP_base)
 
         # Initialize the tower dic
         self.tower_dict = {}
         self.tower_dict[(init_x, init_y)] = self.base_tower
 
+        # Create life bar dict and Sprite group
+        self.lifebar_dict = {}
+        self.lifebars = pygame.sprite.Group()
+
+        # Add base tower lifebar to lifebar dict and Sprite group
+        self.lifebar_dict[(init_x, init_y)] = self.base_tower_lifebar
+        self.lifebars.add(self.base_tower_lifebar)
+        
         # Adds Tower to the "towers" Sprite List
         self.towers = pygame.sprite.Group()
         self.towers.add(self.base_tower)
-
-        # Create life bar dict and Sprite group
-        self.lifebar_dic = {}
-        self.lifebars = pygame.sprite.Group()
 
         # Create enemy dict and Sprite group
         self.enemy_dict = {}
@@ -220,6 +233,12 @@ class Board:
         if collision_tower == None and collision_enemy == None:
             self.tower_dict[(position[0], position[1])] = defense_tower
             self.towers.add(defense_tower)
+            defense_tower_lifebar = Lifebar(self, defense_tower, self.screen, HP_tower)
+
+            # Add defense tower lifebar to lifebar dict and Sprite group
+            self.lifebar_dict[(position[0], position[1])] = defense_tower_lifebar
+            self.lifebars.add(defense_tower_lifebar)
+            
             return True
         else:
             return False
@@ -231,22 +250,18 @@ class Board:
         if collision_tower == None and collision_enemy == None:
             self.enemy_dict[(position[0], position[1])] = enemy
             self.enemies.add(enemy)
+            enemy_lifebar = Lifebar(self, enemy, self.screen, HP_enemy)
+
+            # Add defense tower lifebar to lifebar dict and Sprite group
+            self.lifebar_dict[(position[0], position[1])] = enemy_lifebar
+            self.lifebars.add(enemy_lifebar)
+            
             return True
         else:
             return False
 
     def draw_laser_line(self, screen, enemy_position, tower_position):
         pygame.draw.line(screen, red, tower_position, enemy_position)
-
-class Bloodbar():
-    def __init__(self):
-        self.width = WIDTH
-        self.height = HEIGHT
-        # 	greenpart = HP/width
-        # redpart = 1 - HP / width
-	  # fill rectangle
-	  # position = gameobject.position+some_distance
-    pass
 
 class Game_obj(pygame.sprite.Sprite):
     def __init__(self, board, position, dimensions, HP):
@@ -263,6 +278,34 @@ class Game_obj(pygame.sprite.Sprite):
 #        self.rect.topleft = (position[0] + dimensions[0]/2, position[1] + dimensions[1]/2)
         self.board = board
         self.HP = HP
+
+class Lifebar(Game_obj):
+    def __init__(self, board, boss, screen, full_HP):
+        self.boss = boss
+        self.screen = screen
+        self.position = (self.boss.position[0] - self.boss.dimensions[0]/2, self.boss.position[1] + self.boss.dimensions[1]/2) # lifebar is positioned directly below its boss (game object)
+        self.dimensions = (self.boss.dimensions[0],10) #lifebar is same width as its boss and 10 pixels high
+        self.HP = self.boss.HP
+        super(Lifebar,self).__init__(board, self.position, self.dimensions, self.HP)
+        self.set_pic()
+        pygame.draw.rect(self.screen, (0,255,0), (self.position,self.dimensions))
+        self.oldHP = 0
+        self.full_HP = full_HP
+
+    def set_pic(self):
+        self.image = pygame.Surface(self.dimensions)
+        self.image.set_colorkey((0,0,0)) # black transparent
+   
+    def update_HP(self):
+            self.frac = float(self.boss.HP) / float(self.full_HP)
+            pygame.draw.rect(self.screen, (0,0,0), (self.position,self.dimensions)) # fill black
+            pygame.draw.rect(self.screen, (0,255,0), (self.position,(int(self.boss.dimensions[0] * self.frac),10)),0) # fill green
+            self.oldHP = self.boss.HP
+
+    def update_position(self):
+            # lifebar moves with its boss
+            self.position = (self.boss.position[0] - self.boss.dimensions[0]/2, self.boss.position[1] + self.boss.dimensions[1]/2)
+            self.update_HP()           
 
 class Tower(Game_obj):
     def __init__(self, board, position, dimensions, HP):
