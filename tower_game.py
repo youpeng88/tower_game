@@ -54,7 +54,7 @@ IMAGE_DICT["base_tower"] = ("base_tower.bmp", (20, 40))
 IMAGE_DICT["defense_tower"] = ("defense_tower.bmp", (20, 20))
 IMAGE_DICT["enemy"] = ("enemy.bmp", (20, 20))
 IMAGE_DICT["background"] = ("brick_wall.bmp", MAP_SIZE)
-IMAGE_DICT["gold_icon"] = 
+#IMAGE_DICT["gold_icon"] = 
 
 
 def map_border():
@@ -94,10 +94,11 @@ def update_text(screen, message, location):
     screen.blit(text, textRect)
 
 def sidebar(screen, tower_number, money, wavecount):
+    screen.fill(black)
     update_text(screen, "Tower #: " + str(tower_number), 1)
     update_text(screen, "Money: " + str(money), 2)
     update_text(screen, "Wave #: " + str(wavecount), 3)
-        
+     
         
 def new_game():
     """
@@ -147,6 +148,7 @@ def main_loop(screen, board, starting_varaibles, clock):
     BackGround = Background("background", [MARGIN, MARGIN])
     screen.blit(BackGround.image, BackGround.rect)
     pygame.display.flip()
+    
 
     board.towers.draw(screen) # draw tower Sprite
     pygame.display.flip()
@@ -156,8 +158,6 @@ def main_loop(screen, board, starting_varaibles, clock):
     event_types = [event.type for event in events]
     while pygame.QUIT not in event_types: # when use didn't click exit on the window
 
-         # call sidebar
-         sidebar(screen, tower_number, money, wavecount)
          board.add_enemy_to_board((30,30),speed_level, HP_enemy, attack_power)
          pygame.display.flip()
 
@@ -174,13 +174,19 @@ def main_loop(screen, board, starting_varaibles, clock):
 
          #Updated Action 2 and 5 (move)
          num_border_locs = len(border)
+         num_enemies = 2
+         time_period = 3000
          elapsed_time = pygame.time.get_ticks() - time_created
-         print elapsed_time
-         if elapsed_time > 1000:
-            index = random.randint(0,num_border_locs-1)
-            x,y = border[index]
-            board.add_enemy_to_board((x,y),speed_level, HP_enemy, attack_power)
-            time_created = pygame.time.get_ticks()
+         #print elapsed_time
+         if elapsed_time > time_period:
+             enemies_count = 0
+             while enemies_count < num_enemies: 
+                 index = random.randint(0,num_border_locs-1)
+                 x,y = border[index]
+                 board.add_enemy_to_board((x,y),speed_level, HP_enemy, attack_power)
+                 enemies_count +=1
+             time_created = pygame.time.get_ticks()
+             wavecount +=1
         ###Test
          #
          # # action 2: add enemies per wave frequecy
@@ -198,13 +204,19 @@ def main_loop(screen, board, starting_varaibles, clock):
          #     # increase money when enemy died
          #
          #     # action 4: enemy attack defense and base tower
-         #
-             # action 5: enemies move
+         #            
+             
+         # action 3: defense attacks enemy (shoot)
+             
+         # action 4: enemy attack defense and base tower
+             
+         # action 5: enemies move    
          # test movement: board.add_enemy_to_board((11,11),speed_level, HP_enemy)
          board.enemies.update()
 
-
-         #screen.fill(black) # (0,0,0) represents RGB for black
+        # call sidebar
+         sidebar(screen, tower_number, money, wavecount)
+#        screen.fill(black) # (0,0,0) represents RGB for black
          screen.blit(BackGround.image, BackGround.rect)
          board.towers.draw(screen)
 
@@ -250,13 +262,14 @@ class Board:
     def add_tower_to_board(self, position, HP_tower,defense_range):
         defense_tower = Defense_tower(self, position, "defense_tower", HP_tower, defense_range)
         if defense_tower.rect.x < MARGIN or defense_tower.rect.topright[0] > MARGIN + MAP_SIZE[0] or defense_tower.rect.y < MARGIN or defense_tower.rect.bottomleft[1] > MARGIN + MAP_SIZE[1]:
-            pass
+            return False
         else:
             collision_tower = pygame.sprite.spritecollideany(defense_tower, self.towers, None)
             collision_enemy = pygame.sprite.spritecollideany(defense_tower, self.enemies, None)
             if collision_tower == None and collision_enemy == None:
                 self.tower_dict[(position[0], position[1])] = defense_tower
                 self.towers.add(defense_tower)
+                return True
 
     def add_enemy_to_board(self, position, speed_level, HP_enemy, attack_power):
         enemy = Enemies(self, position, "enemy", HP_enemy, speed_level, attack_power)
