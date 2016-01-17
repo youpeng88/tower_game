@@ -10,8 +10,6 @@ Thoughts for additional changes:
     1. Starting variables can be improved, maybe make it a dictionary instead of a list
 '''
 
-#Zach test final
-
 import pygame
 import os
 import random
@@ -199,7 +197,7 @@ class Board:
     def draw_laser_line(self, screen, enemy_position, tower_position):
         pygame.draw.line(screen, red, tower_position, enemy_position)
 
-class Bloodbar():
+class Bloodbar(Game_obj):
     def __init__(self):
         self.width = WIDTH
         self.height = HEIGHT
