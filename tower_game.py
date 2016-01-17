@@ -130,7 +130,6 @@ def main_loop(screen, board, starting_varaibles, clock):
 
     board.towers.draw(screen) # draw tower Sprite
     pygame.display.flip()
-<<<<<<< HEAD
     
     border = map_border()
     events = pygame.event.get()
@@ -189,56 +188,6 @@ class Background(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.image = pygame.transform.scale(self.image,(MAP_SIZE[0], MAP_SIZE[1]))
         self.rect.left, self.rect.top = location
-=======
-
-    events = pygame.event.get()
-    event_types = [event.type for event in events]
-    while pygame.QUIT not in event_types: # when use didn't click exit on the window
-            milliseconds = clock.tick_busy_loop()  # milliseconds passed since last frame
-            seconds = milliseconds/1000.0
-
-            # call sidebar
-            pygame.display.flip()
-            # bring waves of enemies
-            frequency = 1000 # in milliseconds
-            num_enemies = 1 # number of enemies generated per wave
-            pygame.time.set_timer(pygame.USEREVENT + 1, frequency)
-
-            # action 1: add tower
-            if pygame.mouse.get_pressed()[0]:
-                x,y = pygame.mouse.get_pos()
-                #row,col = get_row_column_number(x,y, WIDTH, HEIGHT)
-                # add a defense tower at the location clicked
-                if board.add_tower_to_board(y,x, HP_tower):
-                    board.towers.draw(screen)
-                    pygame.display.flip()
-                    money -= 500
-                    tower_number +=1
-
-            # action 2: add enemies per wave frequecy
-            if pygame.USEREVENT + 1 in event_types:
-                # add enemies to board
-                enemies_count = 0
-                while enemies_count < num_enemies:
-                    row = random.randint(11,10+(board_size[1]-1)*WIDTH)
-                    col = random.randint(11,10+(board_size[0]-1)*HEIGHT)
-                    if board.add_enemy_to_board(row,col,speed_level, HP_enemy):
-                        enemies_count +=1
-                wavecount +=1
-            # action 3: defense attacks enemy (shoot)
-
-            # action 4: enemy attack defense and base tower
-
-            # action 5: enemies move
-            board.enemies.update(seconds)
-            board.enemies.draw(screen)
-            pygame.display.flip()
-
-            events = pygame.event.get()
-            event_types = [event.type for event in events] # update event list
-    pass
-
->>>>>>> cb5876f7b65b6b0952767197ad82e0ecc118ca35
 
 class Board:
     def __init__(self, HP_base):
