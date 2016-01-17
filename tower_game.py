@@ -10,8 +10,6 @@ Thoughts for additional changes:
     1. Starting variables can be improved, maybe make it a dictionary instead of a list
 '''
 
-
-
 import pygame
 import os
 import random
@@ -29,8 +27,36 @@ blue  = (0, 0, 255)
 
 # map size
 MAP_SIZE = (600, 600)  # (width in pixels, height in pixels)
+
+# margins (same for all sides)
+MARGIN = 10
+
 # screen size
-SCREEN_SIZE = (1000, 800)  # (width in pixels, height in pixels)
+SCREEN_SIZE = (1000, MAP_SIZE[1]+2*MARGIN)  # (width in pixels, height in pixels)
+
+# bar_size
+BAR_SIZE = (SCREEN_SIZE[0]-3*MARGIN-MAP_SIZE[0],MAP_SIZE[1])
+
+# default dimensions
+DIMENSIONS = (20,20)
+
+def map_border():
+    xr = range(MARGIN+1,MAP_SIZE[0]+MARGIN)
+    yr = range(MARGIN+1,MAP_SIZE[1]+MARGIN)
+    n1 = len(xr)
+    n2 = len(yr)
+    x0 = [MARGIN+1] * n1
+    y0 = [MARGIN+1] * n2
+    xn = [MARGIN+MAP_SIZE[0]] * n1
+    yn = [MARGIN+MAP_SIZE[1]] * n2
+   
+    b1 = zip(x0,yr)
+    b2 = zip(xn,yr)
+    b3 = zip(xr,y0)
+    b4 = zip(xr,yn)
+    
+    border = b1 + b2 + b3 + b4
+    return border
 
 def calc_distance (obj1, obj2):
     distance = math.sqrt((obj2[0]-obj1[0])**2 + (obj2[1]-obj1[1])**2)
@@ -46,28 +72,32 @@ def update_text(screen, message, location):
     textY = 0 + textSize
     text = font.render(message, True, white, black)
     textRect = text.get_rect()
-    textRect.centerx = MAP_SIZE[0] + ((SCREEN_SIZE[0] - MAP_SIZE[0])/ 2)
-    textRect.centery = 100+textY*location*2
+    textRect.centerx = 2*MARGIN + MAP_SIZE[0] + BAR_SIZE[0]/2
+    textRect.centery = MARGIN+100+textY*location*2
     screen.blit(text, textRect)
 
 def sidebar(screen, tower_number, money, wavecount):
     update_text(screen, "Tower #: " + str(tower_number), 1)
     update_text(screen, "Money: " + str(money), 2)
     update_text(screen, "Wave #: " + str(wavecount), 3)
-
-
+        
+        
 def new_game():
     """
     Sets up all necessary components to start a new game
     of power tower.
     """
     pygame.init() # initialize all imported pygame modules
+    
+    # setup background
+    BackGround = Background('brick_wall.bmp', [MARGIN,MARGIN])
 
     screen = pygame.display.set_mode(SCREEN_SIZE)
 
     pygame.display.set_caption("Tower Power") # caption sets title of Window 
-
+    
     screen.fill(black) # (0,0,0) represents RGB for black
+    screen.blit(BackGround.image, BackGround.rect)
 
     pygame.display.flip()
 
@@ -79,8 +109,9 @@ def new_game():
     tower_number = 1
     wavecount = 0
     money = 5000
+    defense_range = 20
 
-    starting_varaibles = [HP_enemy, HP_tower, HP_base, speed_level, tower_number, wavecount, money]
+    starting_varaibles = [HP_enemy, HP_tower, speed_level, tower_number, wavecount, money, defense_range]
 
     board = Board(HP_base)
 
@@ -89,74 +120,82 @@ def new_game():
     main_loop(screen, board, starting_varaibles, clock)
 
 def main_loop(screen, board, starting_varaibles, clock):
-    background = pygame.Surface((screen.get_width(), screen.get_height()))
-    background.fill(white)
     HP_enemy = starting_varaibles[0]
     HP_tower = starting_varaibles[1]
-    HP_base = starting_varaibles[2]
-    speed_level = starting_varaibles[3]
-    tower_number = starting_varaibles[4]
-    wavecount = starting_varaibles[5]
-    money = starting_varaibles[6]
+    speed_level = starting_varaibles[2]
+    tower_number = starting_varaibles[3]
+    wavecount = starting_varaibles[4]
+    money = starting_varaibles[5]
+    defense_range = starting_varaibles[6]
 
     board.towers.draw(screen) # draw tower Sprite
     pygame.display.flip()
-    #
-    # events = pygame.event.get()
-    # event_types = [event.type for event in events]
-    # while pygame.QUIT not in event_types: # when use didn't click exit on the window
-    #         milliseconds = clock.tick_busy_loop()  # milliseconds passed since last frame
-    #         seconds = milliseconds/1000.0
-    #
-    #         # call sidebar
-    #         pygame.display.flip()
-    #         # bring waves of enemies
-    #         frequency = 1000 # in milliseconds
-    #         num_enemies = 1 # number of enemies generated per wave
-    #         pygame.time.set_timer(pygame.USEREVENT + 1, frequency)
-    #
-    #         # action 1: add tower
-    #         if pygame.mouse.get_pressed()[0]:
-    #             x,y = pygame.mouse.get_pos()
-    #             #row,col = get_row_column_number(x,y, WIDTH, HEIGHT)
-    #             # add a defense tower at the location clicked
-    #             if board.add_tower_to_board(y,x, HP_tower):
-    #                 board.towers.draw(screen)
-    #                 pygame.display.flip()
-    #                 money -= 500
-    #                 tower_number +=1
-    #
-    #         # action 2: add enemies per wave frequecy
-    #         if pygame.USEREVENT + 1 in event_types:
-    #             # add enemies to board
-    #             enemies_count = 0
-    #             while enemies_count < num_enemies:
-    #                 row = random.randint(11,10+(board_size[1]-1)*WIDTH)
-    #                 col = random.randint(11,10+(board_size[0]-1)*HEIGHT)
-    #                 if board.add_enemy_to_board(row,col,speed_level, HP_enemy):
-    #                     enemies_count +=1
-    #             wavecount +=1
-    #         # action 3: defense attacks enemy (shoot)
-    #
-    #         # action 4: enemy attack defense and base tower
-    #
-    #         # action 5: enemies move
-    #         board.enemies.update(seconds)
-    #         board.enemies.draw(screen)
-    #         pygame.display.flip()
-    #
-    #         events = pygame.event.get()
-    #         event_types = [event.type for event in events] # update event list
-    # pass
+    
+    border = map_border()
+    events = pygame.event.get()
+    event_types = [event.type for event in events]
+    while pygame.QUIT not in event_types: # when use didn't click exit on the window
+         milliseconds = clock.tick_busy_loop()  # milliseconds passed since last frame
+         seconds = milliseconds/1000.0
 
+         # call sidebar
+         sidebar(screen, tower_number, money, wavecount)
+         pygame.display.flip()
+         
+         # bring waves of enemies
+         frequency = 100 # in milliseconds
+         num_enemies = 1 # number of enemies generated per wave
+         pygame.time.set_timer(pygame.USEREVENT + 1, frequency)
+
+         # action 1: add tower
+         if pygame.mouse.get_pressed()[0]:
+             x,y = pygame.mouse.get_pos()
+             # add a defense tower at the location clicked
+             if board.add_tower_to_board((x,y), HP_tower, defense_range):
+                 board.towers.draw(screen)
+                 pygame.display.flip()
+                 money -= 500
+                 tower_number +=1
+
+         # action 2: add enemies per wave frequecy
+         if pygame.USEREVENT + 1 in event_types:
+             # add enemies to board
+             enemies_count = 0
+             num_border_locs = len(border)
+             while enemies_count < num_enemies:
+                 index = random.randint(1,num_border_locs)
+                 x,y = border[index]
+                 if board.add_enemy_to_board((x,y),speed_level, HP_enemy):
+                     enemies_count +=1
+             wavecount +=1
+             # action 3: defense attacks enemy (shoot)
+    
+             # action 4: enemy attack defense and base tower
+    
+             # action 5: enemies move
+             board.enemies.update(seconds)
+             board.enemies.draw(screen)
+             pygame.display.flip()
+    
+         events = pygame.event.get()
+         event_types = [event.type for event in events] # update event list
+         pass
+
+class Background(pygame.sprite.Sprite):
+    def __init__(self, image_file, location):
+        pygame.sprite.Sprite.__init__(self)  #call Sprite initializer
+        self.image = pygame.image.load(image_file)
+        self.rect = self.image.get_rect()
+        self.image = pygame.transform.scale(self.image,(MAP_SIZE[0], MAP_SIZE[1]))
+        self.rect.left, self.rect.top = location
 
 class Board:
     def __init__(self, HP_base):
 
         # Initialize the base Tower
-        init_x = MAP_SIZE[0]/2
-        init_y = MAP_SIZE[1]/2
-        self.base_tower = Tower(self, init_x, init_y, HP_base)
+        init_x = MARGIN+MAP_SIZE[0]/2
+        init_y = MARGIN+MAP_SIZE[1]/2
+        self.base_tower = Tower(self,(init_x, init_y),(20,40), HP_base)
 
         # Initialize the tower dic
         self.tower_dict = {}
@@ -174,8 +213,8 @@ class Board:
         self.enemy_dict = {}
         self.enemies = pygame.sprite.Group()
 
-    def add_tower_to_board(self, position, HP_tower):
-        defense_tower = Defense_tower(self, position[0],position[1], HP_tower)
+    def add_tower_to_board(self, position, HP_tower,defense_range):
+        defense_tower = Defense_tower(self,position,DIMENSIONS,HP_tower,defense_range)
         collision_tower = pygame.sprite.spritecollideany(defense_tower, self.towers, None)
         collision_enemy = pygame.sprite.spritecollideany(defense_tower, self.enemies, None)
         if collision_tower == None and collision_enemy == None:
@@ -186,7 +225,7 @@ class Board:
             return False
 
     def add_enemy_to_board(self, position, speed_level, HP_enemy):
-        enemy = Enemies(self, position[0], position[1], speed_level, HP_enemy)
+        enemy = Enemies(self, position, DIMENSIONS, speed_level, HP_enemy)
         collision_tower = pygame.sprite.spritecollideany(enemy, self.towers, None)
         collision_enemy = pygame.sprite.spritecollideany(enemy, self.enemies, None)
         if collision_tower == None and collision_enemy == None:
@@ -210,15 +249,18 @@ class Bloodbar():
     pass
 
 class Game_obj(pygame.sprite.Sprite):
-    def __init__(self, board, position = (MAP_SIZE[0]/2, MAP_SIZE[1]/2), dimensions = (20, 20), HP = 100):
+    def __init__(self, board, position, dimensions, HP):
         pygame.sprite.Sprite.__init__(self)
         self.position = position
         self.dimensions = dimensions
-        self.rect = pygame.Surface([dimensions[0], dimensions[1]]).get_rect()
-        self.rect.topleft = (position[0] - dimensions[0]/2, position[1] - dimensions[1]/2)
-        self.rect.bottomleft = (position[0] - dimensions[0]/2, position[1] + dimensions[1]/2)
-        self.rect.topright = (position[0] + dimensions[0]/2, position[1] - dimensions[1]/2)
-        self.rect.topleft = (position[0] + dimensions[0]/2, position[1] + dimensions[1]/2)
+        self.rect = pygame.Surface([dimensions[0],dimensions[1]]).get_rect()
+        self.rect.center = position
+#        self.rect.x = position[0] - dimensions[0]/2
+#        self.rect.y = position[1] - dimensions[1]/2
+#        self.rect.topleft = (position[0] - dimensions[0]/2, position[1] - dimensions[1]/2)
+#        self.rect.bottomleft = (position[0] - dimensions[0]/2, position[1] + dimensions[1]/2)
+#        self.rect.topright = (position[0] + dimensions[0]/2, position[1] - dimensions[1]/2)
+#        self.rect.topleft = (position[0] + dimensions[0]/2, position[1] + dimensions[1]/2)
         self.board = board
         self.HP = HP
 
@@ -271,9 +313,11 @@ class Enemies(Game_obj):
 
         self.set_pic()
         self.speed_level = 1*level
-        self.point_at_base()
-        self.position = position
+        
         self.orientation = (0,1) #points up initially
+        self.point_at_base(board)
+        self.position = position
+
 
     def point_at_base(self, board): # moving direction
         direction = (board.base_tower.position[0] - self.position[0], board.base_tower.position[1] - self.position[1])
@@ -283,7 +327,7 @@ class Enemies(Game_obj):
         #from orientation_change calculate the degree of rotation, then rotate the image accordingly
         angle = math.atan2(orientation_change[1], orientation_change[0])
         angle = math.degrees(angle)
-        self.image = pygame.transform.roate(self.image, angle)
+        self.image = pygame.transform.rotate(self.image, angle)
 
         self.orientation = new_orientation
         self.dx = self.speed_level*(self.orientation[0])
