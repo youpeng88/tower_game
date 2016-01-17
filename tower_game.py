@@ -41,6 +41,21 @@ BAR_SIZE = (SCREEN_SIZE[0]-3*MARGIN-MAP_SIZE[0],MAP_SIZE[1])
 # default dimensions
 DIMENSIONS = (20,20)
 
+# PC Dictionary relating object type to the image files it uses and its dimensions
+IMAGE_DICT = {}
+IMAGE_DICT["base_tower"] = ("base_tower.png", (20, 40))
+IMAGE_DICT["defense_tower"] = ("defense_tower.png", (20, 20))
+IMAGE_DICT["enemy"] = ("enemy.png", (20, 20))
+IMAGE_DICT["background"] = ("brick_wall.png", MAP_SIZE)
+
+# # MAC Dictionary relating object type to the image files it uses and its dimensions
+# IMAGE_DICT = {}
+# IMAGE_DICT["base_tower"] = ("base_tower.bmp", (20, 40))
+# IMAGE_DICT["defense_tower"] = ("defense_tower.bmp", (20, 20))
+# IMAGE_DICT["enemy"] = ("enemy.bmp", (20, 20))
+# IMAGE_DICT["background"] = ("brick_wall.bmp", MAP_SIZE)
+
+
 def map_border():
     xr = range(MARGIN+1,MAP_SIZE[0]+MARGIN)
     yr = range(MARGIN+1,MAP_SIZE[1]+MARGIN)
@@ -91,7 +106,7 @@ def new_game():
     pygame.init() # initialize all imported pygame modules
     
     # setup background
-    BackGround = Background('brick_wall.bmp', [MARGIN,MARGIN])
+    BackGround = Background("background", [MARGIN, MARGIN])
 
     screen = pygame.display.set_mode(SCREEN_SIZE)
 
@@ -111,9 +126,10 @@ def new_game():
     wavecount = 0
     money = 5000
     defense_range = 20
+    attack_power = 2
     tower_cost = 500
 
-    starting_varaibles = [HP_enemy, HP_tower, speed_level, tower_number, wavecount, money, defense_range, tower_cost]
+    starting_varaibles = [HP_enemy, HP_tower, speed_level, tower_number, wavecount, money, defense_range, tower_cost, attack_power]
 
     board = Board(HP_base)
 
@@ -130,6 +146,7 @@ def main_loop(screen, board, starting_varaibles, clock):
     money = starting_varaibles[5]
     defense_range = starting_varaibles[6]
     tower_cost = starting_varaibles[7]
+    attack_power = starting_varaibles[8]
 
     board.towers.draw(screen) # draw tower Sprite
     pygame.display.flip()
@@ -169,7 +186,7 @@ def main_loop(screen, board, starting_varaibles, clock):
              while enemies_count <= num_enemies:
                  index = random.randint(0,num_border_locs-1)
                  x,y = border[index]
-                 if board.add_enemy_to_board((x,y),speed_level, HP_enemy):
+                 if board.add_enemy_to_board((x,y),speed_level, HP_enemy, attack_power):
                      enemies_count +=1
              wavecount +=1
              # action 3: defense attacks enemy (shoot)
@@ -188,12 +205,12 @@ def main_loop(screen, board, starting_varaibles, clock):
          pass
 
 class Background(pygame.sprite.Sprite):
-    def __init__(self, image_file, location):
+    def __init__(self, obj_type, position):
         pygame.sprite.Sprite.__init__(self)  #call Sprite initializer
-        self.image = pygame.image.load(image_file)
+        self.image = pygame.image.load(IMAGE_DICT[obj_type][0])
+        self.image = pygame.transform.scale(self.image, IMAGE_DICT[obj_type][1])
         self.rect = self.image.get_rect()
-        self.image = pygame.transform.scale(self.image,(MAP_SIZE[0], MAP_SIZE[1]))
-        self.rect.left, self.rect.top = location
+        self.rect.left, self.rect.top = position
 
 class Board:
     def __init__(self, HP_base):
@@ -201,7 +218,7 @@ class Board:
         # Initialize the base Tower
         init_x = MARGIN+MAP_SIZE[0]/2
         init_y = MARGIN+MAP_SIZE[1]/2
-        self.base_tower = Tower(self,(init_x, init_y),(20,40), HP_base)
+        self.base_tower = Tower(self, (init_x, init_y), "base_tower", HP_base)
 
         # Initialize the tower dic
         self.tower_dict = {}
@@ -220,7 +237,7 @@ class Board:
         self.enemies = pygame.sprite.Group()
 
     def add_tower_to_board(self, position, HP_tower,defense_range):
-        defense_tower = Defense_tower(self,position,DIMENSIONS,HP_tower,defense_range)
+        defense_tower = Defense_tower(self, position, "defense_tower", HP_tower, defense_range)
         if defense_tower.rect.x < MARGIN or defense_tower.rect.topright[0] > MARGIN + MAP_SIZE[0] or defense_tower.rect.y < MARGIN or defense_tower.rect.bottomleft[1] > MARGIN + MAP_SIZE[1]:            
             return False
         else:
@@ -233,8 +250,8 @@ class Board:
             else:
                 return False           
 
-    def add_enemy_to_board(self, position, speed_level, HP_enemy):
-        enemy = Enemies(self, position, DIMENSIONS, speed_level, HP_enemy)
+    def add_enemy_to_board(self, position, speed_level, HP_enemy, attack_power):
+        enemy = Enemies(self, position, "enemy", HP_enemy, speed_level, attack_power)
         collision_tower = pygame.sprite.spritecollideany(enemy, self.towers, None)
         collision_enemy = pygame.sprite.spritecollideany(enemy, self.enemies, None)
         if collision_tower == None and collision_enemy == None:
@@ -249,56 +266,46 @@ class Board:
 
 class Bloodbar():
     def __init__(self):
-        self.width = WIDTH
-        self.height = HEIGHT
+        # self.width = WIDTH
+        # self.height = HEIGHT
         # 	greenpart = HP/width
         # redpart = 1 - HP / width
 	  # fill rectangle
 	  # position = gameobject.position+some_distance
-    pass
+        pass
 
 class Game_obj(pygame.sprite.Sprite):
-    def __init__(self, board, position, dimensions, HP):
+    def __init__(self, board, position, obj_type, init_HP):
         pygame.sprite.Sprite.__init__(self)
-        self.position = position
-        self.dimensions = dimensions
-        self.rect = pygame.Surface([dimensions[0],dimensions[1]]).get_rect()
-        self.rect.center = position
-#        self.rect.x = position[0] - dimensions[0]/2
-#        self.rect.y = position[1] - dimensions[1]/2
-#        self.rect.topleft = (position[0] - dimensions[0]/2, position[1] - dimensions[1]/2)
-#        self.rect.bottomleft = (position[0] - dimensions[0]/2, position[1] + dimensions[1]/2)
-#        self.rect.topright = (position[0] + dimensions[0]/2, position[1] - dimensions[1]/2)
-#        self.rect.topleft = (position[0] + dimensions[0]/2, position[1] + dimensions[1]/2)
         self.board = board
-        self.HP = HP
+        self.position = position
+        self.dimensions = IMAGE_DICT[obj_type][1]
+        self.HP = init_HP
+        self.image = pygame.image.load(IMAGE_DICT[obj_type][0]).convert_alpha()
+        self.image = pygame.transform.scale(self.image, IMAGE_DICT[obj_type][1])
+        self.rect = self.image.get_rect()
+        self.rect.center = position
+        #
+        # self.rect.topleft = (position[0] - self.dimensions[0]/2, position[1] - self.dimensions[1]/2)
+        # self.rect.bottomleft = (position[0] - self.dimensions[0]/2, position[1] + self.dimensions[1]/2)
+        # self.rect.topright = (position[0] + self.dimensions[0]/2, position[1] - self.dimensions[1]/2)
+        # self.rect.topleft = (position[0] + self.dimensions[0]/2, position[1] + self.dimensions[1]/2)
 
 class Tower(Game_obj):
-    def __init__(self, board, position, dimensions, HP):
-        super(Tower,self).__init__(board, position, dimensions, HP)
-        self.set_pic()
+    def __init__(self, board, position, obj_type, init_HP):
+        super(Tower, self).__init__(board, position, obj_type, init_HP)
 
-    def set_pic(self):
-        self.image = pygame.image.load("base_tower.bmp").convert_alpha()
-        self.image = pygame.transform.scale(self.image,(self.dimensions[0], self.dimensions[1]))
-        self.image.set_alpha(128)        
-
-    def decrease_HP(self,decreased_HP):
-        self.HP -= decreased_HP
-        if self.HP < 0:
-            self.kill_sprite()
-
-    def kill_sprite(self):
+    def tower_death(self):
         # need to remove the object from the board
         # from dic list
         self.board.tower[(self.position[0], self.position[1])] = None
         # from sprite group
         self.kill()
 
+
 class Defense_tower(Tower):
-    def __init__(self, board, position, dimensions, HP, defense_range):
-        super(Defense_tower,self).__init__(board, position, dimensions, HP)
-        self.set_pic()
+    def __init__(self, board, position, obj_type, init_HP, defense_range):
+        super(Defense_tower,self).__init__(board, position, obj_type, init_HP)
         self.collison = False
         self.defense_range = defense_range
 
@@ -318,61 +325,56 @@ class Defense_tower(Tower):
             return e_position
 
 class Enemies(Game_obj):
-    def __init__(self, board, position, dimensions, level, HP):
-        super(Enemies,self).__init__(board, position, dimensions, HP)
-
-        self.set_pic()
+    def __init__(self, board, position, obj_type, init_HP, level, attack_power):
+        super(Enemies,self).__init__(board, position, obj_type, init_HP)
+        self.position = position
+        self.orientation = (0, 1) #points up initially
         self.speed_level = 1*level
-        
-        self.orientation = (0,1) #points up initially
-        self.dx = 1
-        self.dy = 1
-        self.point_at_base(board)
+        self.attack_power = attack_power
+        self.dx = 0
+        self.dy = 0
+        self.point_at_base()
 
     def point_at_base(self, board): # moving direction
         direction = (board.base_tower.position[0] - self.position[0], board.base_tower.position[1] - self.position[1])
         distance = calc_distance(self.position, board.base_tower.position)
         new_orientation = (direction[0]/distance, direction[1]/distance)
         orientation_change = (new_orientation[0] - self.orientation[0], new_orientation[1]- self.orientation[1])
-        
         #from orientation_change calculate the degree of rotation, then rotate the image accordingly
         angle = math.atan2(orientation_change[1], orientation_change[0])
         angle = math.degrees(angle)
         self.image = pygame.transform.rotate(self.image, angle)
-        
-        # date update spped
+
         self.orientation = new_orientation
         self.dx = self.speed_level*(self.orientation[0])
         self.dy = self.speed_level*(self.orientation[1])
 
-    def set_pic(self):
-        self.image = pygame.image.load("enemy.bmp").convert_alpha()
-        self.image = pygame.transform.scale(self.image,(self.dimensions[0], self.dimensions[1]))
+
 
     def set_new_speed(self,new_level):
         self.speed_level = 1*new_level
 
-    def decrease_HP(self,decreased_HP):
-        self.HP -= decreased_HP
-        if self.HP < 0:
-            self.kill()
+    def attack(self, collision):
+        collision.HP -= self.attack_power
+        if collision.HP < 0:
+            collision.tower_death()
 
-    def kill(self):
+    def enemy_death(self):
         # need to remove the object from the board
         # from dic list
-        self.board.enemy_group[(self.rect.x,self.rect.y)] = None
+        self.board.enemy_dict[(self.position[0], self.position[1])] = None
         # from sprite group
-        # self.enemies
-        # NOT FINISHED
-        pass
-
-    def touching_defense_or_base_tower(self):
-        pass
+        self.kill()
+    def touching_defense_or_base_tower(self, board):
+        collision = self.spritecollideany(self, board.towers, collided=None)
+        if collision is not None:
+            self.attack(collision)
+            self.dx = 0
+            self.dy = 0
 
     def update(self,seconds):
         # add in angles from find direction to base tower
         self.rect.x += self.dx * seconds
         self.rect.y += self.dy * seconds
-        pass
 
 new_game()
