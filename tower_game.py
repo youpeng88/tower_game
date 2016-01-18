@@ -129,7 +129,7 @@ def new_game(screen,saved_stats = None):
     HP_tower = 500
     HP_base = 1000
     speed_level = 1
-    defense_range = 50
+    defense_range = 200
     attack_power_tower = 2
     attack_power_enemy = 5
     tower_cost = 500
@@ -449,7 +449,7 @@ class Enemies(Game_obj):
         super(Enemies,self).__init__(board, time, position, obj_type, init_HP, attack_power)
         self.position = position
         self.orientation = (0, 1) #points up initially
-        self.speed_level = 10*level
+        self.speed_level = 2*level
         self.dx = 0
         self.dy = 0
         self.point_at_base(board)
