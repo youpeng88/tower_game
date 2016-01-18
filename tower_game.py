@@ -42,18 +42,18 @@ BAR_SIZE = (MAP_SIZE[0],SCREEN_SIZE[1]-3*MARGIN-MAP_SIZE[0],)
 DIMENSIONS = (20,20)
 
 #PC Dictionary relating object type to the image files it uses and its dimensions
-IMAGE_DICT = {}
-IMAGE_DICT["base_tower"] = ("base_tower.png", (20, 40))
-IMAGE_DICT["defense_tower"] = ("defense_tower.png", (20, 20))
-IMAGE_DICT["enemy"] = ("enemy.png", (20, 20))
-IMAGE_DICT["background"] = ("brick_wall.png", MAP_SIZE)
+#IMAGE_DICT = {}
+#IMAGE_DICT["base_tower"] = ("base_tower.png", (20, 40))
+#IMAGE_DICT["defense_tower"] = ("defense_tower.png", (20, 20))
+#IMAGE_DICT["enemy"] = ("enemy.png", (20, 20))
+#IMAGE_DICT["background"] = ("brick_wall.png", MAP_SIZE)
 #
-# # MAC Dictionary relating object type to the image files it uses and its dimensions
-# IMAGE_DICT = {}
-# IMAGE_DICT["base_tower"] = ("base_tower.bmp", (20, 40))
-# IMAGE_DICT["defense_tower"] = ("defense_tower.bmp", (20, 20))
-# IMAGE_DICT["enemy"] = ("enemy.bmp", (20, 20))
-# IMAGE_DICT["background"] = ("brick_wall.bmp", MAP_SIZE)
+ # MAC Dictionary relating object type to the image files it uses and its dimensions
+IMAGE_DICT = {}
+IMAGE_DICT["base_tower"] = ("base_tower.bmp", (20, 40))
+IMAGE_DICT["defense_tower"] = ("defense_tower.bmp", (20, 20))
+IMAGE_DICT["enemy"] = ("enemy.bmp", (20, 20))
+IMAGE_DICT["background"] = ("brick_wall.bmp", MAP_SIZE)
 #IMAGE_DICT["gold_icon"] = 
 
 
@@ -228,7 +228,7 @@ def main_loop(screen, board, starting_varaibles, clock):
 
          # action 5: enemies move    
          # test movement: board.add_enemy_to_board((11,11),speed_level, HP_enemy)
-         board.enemies.update()
+#         board.enemies.update()
 
         # call sidebar
          sidebar(screen, tower_number, money, wavecount)
@@ -429,7 +429,7 @@ class Enemies(Game_obj):
         #from orientation_change calculate the degree of rotation, then rotate the image accordingly
         angle = math.atan2(orientation_change[1], orientation_change[0])
         angle = math.degrees(angle)
-        self.image = pygame.transform.rotate(self.image, angle)
+#        self.image = pygame.transform.rotate(self.image, angle)
 
         self.orientation = new_orientation
         self.dx = self.speed_level*(self.orientation[0])
