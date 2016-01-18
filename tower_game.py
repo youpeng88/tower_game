@@ -12,10 +12,11 @@ Thoughts for additional changes:
 '''
 
 import pygame
-import os
 import random
 import math
 from example_menu import main as menu
+from dashedline import draw_dashed_line as draw_dash
+from dashedline2 import draw_dashed_line as draw_dash2
 
 ### Global Variables
 
@@ -219,6 +220,7 @@ def main_loop(screen, board, starting_varaibles, clock):
          # action 3: defense attacks enemy (shoot)
          for tower in board.towers:
              earned = tower.attack()
+             pygame.display.flip()
              if earned!= None:
                  money += earned
                                  
@@ -328,8 +330,13 @@ class Board:
             self.lifebars.add(enemy_lifebar)
 
     def draw_laser_line(self, enemy_position, tower_position):
-        pygame.draw.line(self.screen, black, tower_position, enemy_position, 2)
-
+        # draws normal solid line
+        # pygame.draw.line(self.screen, black, tower_position, enemy_position, 2)
+        
+        # if we want to draw dashed line
+        #draw_dash(self.screen, black, tower_position, enemy_position, dash_length = 5)
+        draw_dash2(self.screen, green, tower_position, enemy_position, width = 2, dash_length = 5)
+        
 class Game_obj(pygame.sprite.Sprite):
     def __init__(self, board, position, obj_type, init_HP, attack_power):
         pygame.sprite.Sprite.__init__(self)
