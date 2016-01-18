@@ -50,10 +50,10 @@ DIMENSIONS = (20,20)
 
 # MAC Dictionary relating object type to the image files it uses and its dimensions
 IMAGE_DICT = {}
-IMAGE_DICT["base_tower"] = ("base_tower.bmp", (20, 40))
-IMAGE_DICT["defense_tower"] = ("defense_tower.bmp", (20, 20))
-IMAGE_DICT["enemy"] = ("enemy.bmp", (20, 20))
-IMAGE_DICT["background"] = ("brick_wall.bmp", MAP_SIZE)
+IMAGE_DICT["base_tower"] = ("base_tower.png", (20, 40))
+IMAGE_DICT["defense_tower"] = ("defense_tower.png", (20, 20))
+IMAGE_DICT["enemy"] = ("enemy.jpg", (20, 20))
+IMAGE_DICT["background"] = ("brick_wall.png", MAP_SIZE)
 #IMAGE_DICT["gold_icon"] = 
 
 
