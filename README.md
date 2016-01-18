@@ -7,3 +7,10 @@
 
 #Latest Change by Zach:
     12:41 AM: Modified Enemies.point_at_base function such that all enemies now target base
+
+# Changes by Alex:
+    1-18-16 10:30am: Changed the Enemy.point_at_base function to make all enemies move in the right direction. Changed the direction and distance calculation to floats and the speed to 2. Previously, enemies had speed one so any direction that was less than 1 would floor to zero. Now the directions floor to either 0, 1, or 2, but the upper left sprites no longer have both directions floor to zero
+    1-18-16 10:35am: Changed the Enemy.point_at_base function and the angle function to allow proper rotation. The angle calculation now takes two vectors, and using the dot product calculates the angle between the vectors, rotating the appropriate ammount. In order to prevent rotation on every turn, if angle is less than 1 the enemy does not rotate. The angle function catches divide by zero exceptions.
+    1-18-16 11:10am: Modified the .png images for the sprites on the board to be transparent. For pygame on Windows the game can now have transparent pieces. It looks better? Maybe a better background?
+
+
