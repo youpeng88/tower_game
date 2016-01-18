@@ -15,6 +15,7 @@ import pygame
 import os
 import random
 import math
+from example_menu import main as menu
 
 ### Global Variables
 
@@ -56,16 +57,21 @@ IMAGE_DICT["enemy"] = ("enemy.bmp", (20, 20))
 IMAGE_DICT["background"] = ("brick_wall.bmp", MAP_SIZE)
 #IMAGE_DICT["gold_icon"] = 
 
+# define screen
+pygame.init()
+screen = pygame.display.set_mode(SCREEN_SIZE)
+pygame.display.set_caption("Tower Power") # caption sets title of Window
+screen.fill(black) # (0,0,0) represents RGB for black
 
 def map_border():
-    xr = range(MARGIN+1,MAP_SIZE[0]+MARGIN)
-    yr = range(MARGIN+1,MAP_SIZE[1]+MARGIN)
+    xr = range(MARGIN+10,MAP_SIZE[0]+MARGIN-10)
+    yr = range(MARGIN+10,MAP_SIZE[1]+MARGIN-10)
     n1 = len(xr)
     n2 = len(yr)
-    x0 = [MARGIN+1] * n1
-    y0 = [MARGIN+1] * n2
-    xn = [MARGIN+MAP_SIZE[0]] * n1
-    yn = [MARGIN+MAP_SIZE[1]] * n2
+    x0 = [MARGIN+10] * n1
+    y0 = [MARGIN+10] * n2
+    xn = [MARGIN+MAP_SIZE[0]-10] * n1
+    yn = [MARGIN+MAP_SIZE[1]-10] * n2
    
     b1 = zip(x0,yr)
     b2 = zip(xn,yr)
@@ -90,35 +96,37 @@ def update_text(screen, message, location):
     text = font.render(message, True, white, black)
     textRect = text.get_rect()
     textRect.centery = 2*MARGIN + MAP_SIZE[1] + BAR_SIZE[1]/2
-    textRect.centerx = MARGIN+50+textx*(location-1)*8
+    textRect.centerx = MARGIN+35+textx*(location-1)*8
     screen.blit(text, textRect)
 
 def sidebar(screen, tower_number, money, wavecount):
     screen.fill(black)
     update_text(screen, "Tower #: " + str(tower_number), 1)
     update_text(screen, "Money: " + str(money), 2)
-    update_text(screen, "Wave #: " + str(wavecount), 3)
-     
+    update_text(screen, "Wave #: " + str(wavecount), 3) 
+    update_text(screen, "Difficulty Level: Easy", 4) 
         
-def new_game():
+def new_game(screen,saved_stats = None):
     """
     Sets up all necessary components to start a new game
     of power tower.
     """
-    pygame.init() # initialize all imported pygame modules
+    #pygame.init() # initialize all imported pygame modules
     
-    screen = pygame.display.set_mode(SCREEN_SIZE)
-    pygame.display.set_caption("Tower Power") # caption sets title of Window
-    screen.fill(black) # (0,0,0) represents RGB for black
-
-    # starting variables, modified by the setting chosen in the opening menu
+    if saved_stats != None:
+        tower_number = int(saved_stats[0])
+        money = int(saved_stats[1])
+        wavecount = int(saved_stats[2])
+    else:
+        tower_number = 1
+        money = 5000
+        wavecount = 0
+        
+    # other starting variables, modified by the setting chosen in the opening menu
     HP_enemy = 100
     HP_tower = 500
     HP_base = 1000
     speed_level = 1
-    tower_number = 1
-    wavecount = 0
-    money = 5000
     defense_range = 50
     attack_power_tower = 2
     attack_power_enemy = 5
@@ -162,9 +170,6 @@ def main_loop(screen, board, starting_varaibles, clock):
     events = pygame.event.get()
     event_types = [event.type for event in events]
     while pygame.QUIT not in event_types: # when use didn't click exit on the window
-
-         board.add_enemy_to_board((30,30),speed_level, HP_enemy, attack_power_enemy)
-         pygame.display.flip()
 
          # action 1: add tower
          if pygame.mouse.get_pressed()[0]:
@@ -213,9 +218,9 @@ def main_loop(screen, board, starting_varaibles, clock):
              
          # action 3: defense attacks enemy (shoot)
          for tower in board.towers:
-             tower.attack()
-#             if tower.attack()!= None:
-#                 money += tower.attack()
+             earned = tower.attack()
+             if earned!= None:
+                 money += earned
                                  
          # action 4: enemy attack defense and base tower
          for enemy in board.enemies:
@@ -230,7 +235,7 @@ def main_loop(screen, board, starting_varaibles, clock):
          # test movement: board.add_enemy_to_board((11,11),speed_level, HP_enemy)
 #         board.enemies.update()
 
-        # call sidebar
+        # call sidebar        
          sidebar(screen, tower_number, money, wavecount)
 #        screen.fill(black) # (0,0,0) represents RGB for black
          screen.blit(BackGround.image, BackGround.rect)
@@ -245,6 +250,12 @@ def main_loop(screen, board, starting_varaibles, clock):
     
          events = pygame.event.get()
          event_types = [event.type for event in events] # update event list
+         
+    with open('saved_state.txt','w') as f:
+#        f.writelines([str(tower_number), str(money), str(wavecount)])
+        f.write(str(tower_number)+"\n")
+        f.write(str(money)+"\n")
+        f.write(str(wavecount)+"\n")
 
 class Background(pygame.sprite.Sprite):
     def __init__(self, obj_type, position):
@@ -316,8 +327,8 @@ class Board:
             self.lifebar_dict[(position[0], position[1])] = enemy_lifebar
             self.lifebars.add(enemy_lifebar)
 
-    def draw_laser_line(self, screen, enemy_position, tower_position):
-        pygame.draw.line(screen, black, tower_position, enemy_position, 3)
+    def draw_laser_line(self, enemy_position, tower_position):
+        pygame.draw.line(self.screen, black, tower_position, enemy_position, 2)
 
 class Game_obj(pygame.sprite.Sprite):
     def __init__(self, board, position, obj_type, init_HP, attack_power):
@@ -376,18 +387,19 @@ class Tower(Game_obj):
         attack_enemy = self.closest_enemy()
         if attack_enemy != None:
             enemy_position =  attack_enemy.position                  
-            self.board.draw_laser_line(self.board.screen, enemy_position, self.position)
+            self.board.draw_laser_line(enemy_position, self.position)
             attack_enemy.HP -= self.attack_power                 
             if attack_enemy.HP < 0:
                 attack_enemy.enemy_death()
                 money = 50
-                return money
+        return money
+       
 
     def tower_death(self, board):
         # need to remove the object from the board
         # from dic list
         board.tower_dict[(self.position[0], self.position[1])] = None
-        self.position = (0,0)
+        self.position = (20,20)
         # lifebar.kill()
         # from sprite group
         self.kill()
@@ -423,15 +435,16 @@ class Enemies(Game_obj):
 
     def point_at_base(self, board): # moving direction
         direction = (board.base_tower.position[0] - self.position[0], board.base_tower.position[1] - self.position[1])
-        distance = calc_distance(self.position, board.base_tower.position)
+#        distance = calc_distance(self.position, board.base_tower.position)
+        distance = 500
         new_orientation = (direction[0]/distance, direction[1]/distance)
-        orientation_change = (new_orientation[0] - self.orientation[0], new_orientation[1]- self.orientation[1])
-        #from orientation_change calculate the degree of rotation, then rotate the image accordingly
-        angle = math.atan2(orientation_change[1], orientation_change[0])
-        angle = math.degrees(angle)
+#        orientation_change = (new_orientation[0] - self.orientation[0], new_orientation[1]- self.orientation[1])
+#        #from orientation_change calculate the degree of rotation, then rotate the image accordingly
+#        angle = math.atan2(orientation_change[1], orientation_change[0])
+#        angle = math.degrees(angle)
 #        self.image = pygame.transform.rotate(self.image, angle)
 
-        self.orientation = new_orientation
+        self.orientation = new_orientation;
         self.dx = self.speed_level*(self.orientation[0])
         self.dy = self.speed_level*(self.orientation[1])
 
@@ -459,7 +472,19 @@ class Enemies(Game_obj):
 
     def update(self):
         # add in angles from find direction to base tower
-        self.rect.x += self.dx
-        self.rect.y += self.dy
+#        self.rect.x += self.dx
+#        self.rect.y += self.dy
+        self.rect = self.rect.move(self.dx,self.dy)
         self.position = self.rect.center
-new_game()
+
+my_game = new_game(screen)
+
+#results = menu(screen) # start = None, load = 2
+#if results is None: # This means user selected start game
+#    my_game = new_game(screen)
+#elif results == 2: # user selected LOAD game
+#    with open('saved_state.txt','r') as f:
+#        saved_state = f.readlines() # need to pass this into the game to update the state
+#        print saved_state
+#    my_game = new_game(screen,saved_state)
+## use options to specify difficulty level 
