@@ -86,11 +86,24 @@ def map_border():
     return border
 
 def calc_distance (obj1, obj2):
-    distance = math.sqrt((obj2[0]-obj1[0])**2 + (obj2[1]-obj1[1])**2)
-    distance = int(distance)
+    distance = math.sqrt(float((obj2[0]-obj1[0])**2 + (obj2[1]-obj1[1])**2))
     return distance
 
-def update_text(screen, message, location, obj_type):
+def angle(v1, v2):
+    dotproduct = sum((a*b) for a,b in zip(v1, v2))
+    lengthv1 = math.sqrt(sum(a**2 for a in v1))
+    lengthv2 = math.sqrt(sum(a**2 for a in v2))
+    if lengthv1 == 0 or lengthv2 == 0:
+        return 0
+    while True:
+        try:
+            angle = math.acos(dotproduct/ (lengthv1 * lengthv2))
+            angle = math.degrees(angle)
+            return angle
+        except ValueError:
+            return 0
+
+def update_text(screen, message, location,obj_type):
     """
     Used to display the text on the right-hand part of the screen.
     location will be used to decide what variable to display: tower number, money, wave
@@ -177,6 +190,7 @@ def main_loop(screen, board, starting_varaibles, clock):
     events = pygame.event.get()
     event_types = [event.type for event in events]
     gameover = False
+
     while pygame.QUIT not in event_types and gameover is not True: # when use didn't click exit on the window
 
          #pygame.display.flip()
@@ -198,10 +212,10 @@ def main_loop(screen, board, starting_varaibles, clock):
          num_enemies = 2
          time_period = 1000
          elapsed_time = pygame.time.get_ticks() - time_created
-         #print elapsed_time
+
          if elapsed_time > time_period:
              enemies_count = 0
-             while enemies_count < num_enemies: 
+             while enemies_count < num_enemies:
                  index = random.randint(0,num_border_locs-1)
                  x,y = border[index]
                  time = pygame.time.get_ticks()
@@ -453,7 +467,7 @@ class Enemies(Game_obj):
     def __init__(self, board, time, position, obj_type, init_HP, level, attack_power):
         super(Enemies,self).__init__(board, time, position, obj_type, init_HP, attack_power)
         self.position = position
-        self.orientation = (0, 1) #points up initially
+        self.orientation = (0.0, 1.0) #points up initially
         self.speed_level = 2*level
         self.dx = 0
         self.dy = 0
@@ -481,11 +495,10 @@ class Enemies(Game_obj):
         direction = (float(board.base_tower.position[0] - self.position[0]), float(board.base_tower.position[1] - self.position[1]))
         distance = calc_distance(self.position, board.base_tower.position)
         new_orientation = (direction[0]/distance, direction[1]/distance)
-#        orientation_change = (new_orientation[0] - self.orientation[0], new_orientation[1] - self.orientation[1])
-        #from orientation_change calculate the degree of rotation, then rotate the image accordingly
-#        angle = math.atan2(orientation_change[1], orientation_change[0])
-#        angle = math.degrees(angle)
-        #self.image = pygame.transform.rotate(self.image, angle)
+        rotate_angle = angle(new_orientation, self.orientation)
+#        print "angle: ", rotate_angle
+        if rotate_angle > 1:
+            self.image = pygame.transform.rotate(self.image, rotate_angle)
         self.dx = int(self.speed_level*(new_orientation[0]))
         self.dy = int(self.speed_level*(new_orientation[1]))
         self.orientation = new_orientation
