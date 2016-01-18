@@ -41,19 +41,19 @@ BAR_SIZE = (MAP_SIZE[0],SCREEN_SIZE[1]-3*MARGIN-MAP_SIZE[0],)
 # default dimensions
 DIMENSIONS = (20,20)
 
-# PC Dictionary relating object type to the image files it uses and its dimensions
-#IMAGE_DICT = {}
-#IMAGE_DICT["base_tower"] = ("base_tower.png", (20, 40))
-#IMAGE_DICT["defense_tower"] = ("defense_tower.png", (20, 20))
-#IMAGE_DICT["enemy"] = ("enemy.png", (20, 20))
-#IMAGE_DICT["background"] = ("brick_wall.png", MAP_SIZE)
-
-# MAC Dictionary relating object type to the image files it uses and its dimensions
+#PC Dictionary relating object type to the image files it uses and its dimensions
 IMAGE_DICT = {}
-IMAGE_DICT["base_tower"] = ("base_tower.bmp", (20, 40))
-IMAGE_DICT["defense_tower"] = ("defense_tower.bmp", (20, 20))
-IMAGE_DICT["enemy"] = ("enemy.bmp", (20, 20))
-IMAGE_DICT["background"] = ("brick_wall.bmp", MAP_SIZE)
+IMAGE_DICT["base_tower"] = ("base_tower.png", (20, 40))
+IMAGE_DICT["defense_tower"] = ("defense_tower.png", (20, 20))
+IMAGE_DICT["enemy"] = ("enemy.png", (20, 20))
+IMAGE_DICT["background"] = ("brick_wall.png", MAP_SIZE)
+#
+# # MAC Dictionary relating object type to the image files it uses and its dimensions
+# IMAGE_DICT = {}
+# IMAGE_DICT["base_tower"] = ("base_tower.bmp", (20, 40))
+# IMAGE_DICT["defense_tower"] = ("defense_tower.bmp", (20, 20))
+# IMAGE_DICT["enemy"] = ("enemy.bmp", (20, 20))
+# IMAGE_DICT["background"] = ("brick_wall.bmp", MAP_SIZE)
 #IMAGE_DICT["gold_icon"] = 
 
 
@@ -209,7 +209,14 @@ def main_loop(screen, board, starting_varaibles, clock):
          # action 3: defense attacks enemy (shoot)
              
          # action 4: enemy attack defense and base tower
-             
+         for enemy in board.enemies:
+             collision = enemy.touching_defense_or_base_tower(board)
+             if collision is not None:
+                 enemy.attack(collision, board)
+             else:
+                 enemy.point_at_base(board)
+                 enemy.update()
+
          # action 5: enemies move    
          # test movement: board.add_enemy_to_board((11,11),speed_level, HP_enemy)
          board.enemies.update()
@@ -353,10 +360,12 @@ class Tower(Game_obj):
     def __init__(self, board, position, obj_type, init_HP):
         super(Tower, self).__init__(board, position, obj_type, init_HP)
 
-    def tower_death(self):
+    def tower_death(self, board):
         # need to remove the object from the board
         # from dic list
-        self.board.tower[(self.position[0], self.position[1])] = None
+        board.tower_dict[(self.position[0], self.position[1])] = None
+        self.position = (0,0)
+        # lifebar.kill()
         # from sprite group
         self.kill()
 
@@ -406,10 +415,10 @@ class Enemies(Game_obj):
     def set_new_speed(self,new_level):
         self.speed_level = 1*new_level
 
-    def attack(self, collision):
+    def attack(self, collision, board):
         collision.HP -= self.attack_power
         if collision.HP < 0:
-            collision.tower_death()
+            collision.tower_death(board)
 
     def enemy_death(self):
         # need to remove the object from the board
@@ -419,11 +428,11 @@ class Enemies(Game_obj):
         self.kill()
         
     def touching_defense_or_base_tower(self, board):
-        collision = self.spritecollideany(self, board.towers, collided=None)
+        collision = pygame.sprite.spritecollideany(self, board.towers, collided=None)
         if collision is not None:
-            self.attack(collision)
             self.dx = 0
             self.dy = 0
+        return collision
 
     def update(self):
         # add in angles from find direction to base tower
