@@ -15,8 +15,8 @@ import pygame
 import random
 import math
 from example_menu import main as menu
-##from dashedline import draw_dashed_line as draw_dash
-##from dashedline2 import draw_dashed_line as draw_dash2
+# from dashedline import draw_dashed_line as draw_dash
+# from dashedline2 import draw_dashed_line as draw_dash2
 
 ### Global Variables
 
@@ -44,19 +44,22 @@ BAR_SIZE = (MAP_SIZE[0],SCREEN_SIZE[1]-3*MARGIN-MAP_SIZE[0],)
 DIMENSIONS = (20,20)
 
 #PC Dictionary relating object type to the image files it uses and its dimensions
-IMAGE_DICT = {}
-IMAGE_DICT["base_tower"] = ("base_tower.png", (20, 40))
-IMAGE_DICT["defense_tower"] = ("defense_tower.png", (20, 20))
-IMAGE_DICT["enemy"] = ("enemy.png", (20, 20))
-IMAGE_DICT["background"] = ("brick_wall.png", MAP_SIZE)
+#IMAGE_DICT = {}
+#IMAGE_DICT["base_tower"] = ("base_tower.png", (20, 40))
+#IMAGE_DICT["defense_tower"] = ("defense_tower.png", (20, 20))
+#IMAGE_DICT["enemy"] = ("enemy.png", (20, 20))
+#IMAGE_DICT["background"] = ("brick_wall.png", MAP_SIZE)
 #
  # MAC Dictionary relating object type to the image files it uses and its dimensions
-##IMAGE_DICT = {}
-##IMAGE_DICT["base_tower"] = ("base_tower.png", (20, 40))
-##IMAGE_DICT["defense_tower"] = ("defense_tower.png", (20, 20))
-##IMAGE_DICT["enemy"] = ("enemy.jpg", (20, 20))
-##IMAGE_DICT["background"] = ("brick_wall.png", MAP_SIZE)
-#IMAGE_DICT["gold_icon"] = 
+IMAGE_DICT = {}
+IMAGE_DICT["base_tower"] = ("base_tower.bmp", (20, 40))
+IMAGE_DICT["defense_tower"] = ("defense_tower.bmp", (20, 20))
+IMAGE_DICT["enemy"] = ("enemy.bmp", (20, 20))
+IMAGE_DICT["background"] = ("brick_wall.bmp", MAP_SIZE)
+IMAGE_DICT["gold_icon"] = ("gold_coins.bmp", (15,15))
+IMAGE_DICT["tower_icon"] = ("defense_tower_icon.bmp", (15,15))
+IMAGE_DICT["enemy_icon"] = ("enemy_icon.bmp", (15,15))
+IMAGE_DICT["level"] = ("level.bmp", (15,15))
 
 # define screen
 pygame.init()
@@ -84,9 +87,10 @@ def map_border():
 
 def calc_distance (obj1, obj2):
     distance = math.sqrt((obj2[0]-obj1[0])**2 + (obj2[1]-obj1[1])**2)
+    distance = int(distance)
     return distance
 
-def update_text(screen, message, location):
+def update_text(screen, message, location, obj_type):
     """
     Used to display the text on the right-hand part of the screen.
     location will be used to decide what variable to display: tower number, money, wave
@@ -97,15 +101,17 @@ def update_text(screen, message, location):
     text = font.render(message, True, white, black)
     textRect = text.get_rect()
     textRect.centery = 2*MARGIN + MAP_SIZE[1] + BAR_SIZE[1]/2
-    textRect.centerx = MARGIN+35+textx*(location-1)*8
+    textRect.centerx = MARGIN+70+textx*(location-1)*7
     screen.blit(text, textRect)
+    icon = Background(obj_type, [textRect.x - 20, textRect.y])
+    screen.blit(icon.image, icon.rect)
 
 def sidebar(screen, tower_number, money, wavecount):
     screen.fill(black)
-    update_text(screen, "Tower #: " + str(tower_number), 1)
-    update_text(screen, "Money: " + str(money), 2)
-    update_text(screen, "Wave #: " + str(wavecount), 3) 
-    update_text(screen, "Difficulty Level: Easy", 4) 
+    update_text(screen, "Tower #: " + str(tower_number), 1, "tower_icon")
+    update_text(screen, "Money: " + str(money), 2, "gold_icon")
+    update_text(screen, "Wave #: " + str(wavecount), 3, "enemy_icon") 
+    update_text(screen, "Difficulty Level: Easy", 4, "level") 
         
 def new_game(screen,saved_stats = None):
     """
@@ -127,8 +133,8 @@ def new_game(screen,saved_stats = None):
     HP_enemy = 100
     HP_tower = 500
     HP_base = 1000
-    speed_level = 1.0
-    defense_range = 50
+    speed_level = 1
+    defense_range = 200
     attack_power_tower = 2
     attack_power_enemy = 5
     tower_cost = 500
@@ -371,8 +377,8 @@ class Lifebar(pygame.sprite.Sprite):
         self.time = time
         self.boss = boss
         self.screen = screen
-        self.position = (self.boss.position[0] - self.boss.dimensions[0]/2, self.boss.position[1] + self.boss.dimensions[1]/2) # lifebar is positioned directly below its boss (game object)
-        self.dimensions = (self.boss.dimensions[0],10) #lifebar is same width as its boss and 10 pixels high
+        self.position = (self.boss.position[0] - self.boss.dimensions[0]/2, self.boss.position[1] - 7 - self.boss.dimensions[1]/2) # lifebar is positioned directly below its boss (game object)
+        self.dimensions = (self.boss.dimensions[0],5) #lifebar is same width as its boss and 10 pixels high
         self.HP = self.boss.HP
         self.board = board
         self.set_pic()
@@ -387,11 +393,11 @@ class Lifebar(pygame.sprite.Sprite):
 #        self.rect.topleft = self.position       
    
     def update(self):
-            self.position = (self.boss.rect.center[0] - self.boss.dimensions[0]/2, self.boss.rect.center[1] + self.boss.dimensions[1]/2)
+            self.position = (self.boss.rect.center[0] - self.boss.dimensions[0]/2, self.boss.rect.center[1] - 7 - self.boss.dimensions[1]/2)
             
             self.frac = float(self.boss.HP) / float(self.full_HP)
             pygame.draw.rect(self.screen, (0,0,0), (self.position,self.dimensions)) # fill black
-            pygame.draw.rect(self.screen, (0,255,0), (self.position,(int(self.boss.dimensions[0] * self.frac),10)),0) # fill green
+            pygame.draw.rect(self.screen, (0,255,0), (self.position,(int(self.boss.dimensions[0] * self.frac),self.dimensions[1])),0) # fill green
             self.oldHP = self.boss.HP
 
 class Tower(Game_obj):
@@ -448,40 +454,41 @@ class Enemies(Game_obj):
         super(Enemies,self).__init__(board, time, position, obj_type, init_HP, attack_power)
         self.position = position
         self.orientation = (0, 1) #points up initially
-        self.speed_level = 1.0*level
+        self.speed_level = 2*level
         self.dx = 0
         self.dy = 0
         self.point_at_base(board)
 
     def point_at_base(self, board): # moving direction
+#        direction = (board.base_tower.position[0] - self.position[0], board.base_tower.position[1] - self.position[1])
+#        new_orientation = [0, 0]
+#
+#        if direction[0] < 0:
+#            new_orientation[0] = -1
+#        elif direction[0] == 0:
+#            new_orientation[0] = 0
+#        elif direction[0] > 0:
+#            new_orientation[0] = 1
+#        if direction[1] < 0:
+#            new_orientation[1] = -1
+#        elif direction[1] == 0:
+#            new_orientation[1] = 0
+#        elif direction[1] > 0:
+#            new_orientation[1] = 1
+#        self.dx = self.speed_level*new_orientation[0]
+#        self.dy = self.speed_level*new_orientation[1]
 
-        direction = (board.base_tower.position[0] - self.position[0], board.base_tower.position[1] - self.position[1])
-
-        new_orientation = [0, 0]
-
-        if direction[0] < 0:
-            new_orientation[0] = -1
-        elif direction[0] == 0:
-            new_orientation[0] = 0
-        elif direction[0] > 0:
-            new_orientation[0] = 1
-        if direction[1] < 0:
-            new_orientation[1] = -1
-        elif direction[1] == 0:
-            new_orientation[1] = 0
-        elif direction[1] > 0:
-            new_orientation[1] = 1
-#        distance = calc_distance(self.position, board.base_tower.position)
-##        distance = 500
-##        new_orientation = (float(direction[0])/float(distance), float(direction[1])/float(distance))
-##        orientation_change = (new_orientation[0] - self.orientation[0], new_orientation[1]- self.orientation[1])
+        direction = (float(board.base_tower.position[0] - self.position[0]), float(board.base_tower.position[1] - self.position[1]))
+        distance = calc_distance(self.position, board.base_tower.position)
+        new_orientation = (direction[0]/distance, direction[1]/distance)
+#        orientation_change = (new_orientation[0] - self.orientation[0], new_orientation[1] - self.orientation[1])
         #from orientation_change calculate the degree of rotation, then rotate the image accordingly
-##        angle = math.atan2(orientation_change[1], orientation_change[0])
-##        angle = math.degrees(angle)
-        # self.image = pygame.transform.rotate(self.image, angle)
-##        self.orientation = new_orientation
-        self.dx = self.speed_level*new_orientation[0]
-        self.dy = self.speed_level*new_orientation[1]
+#        angle = math.atan2(orientation_change[1], orientation_change[0])
+#        angle = math.degrees(angle)
+        #self.image = pygame.transform.rotate(self.image, angle)
+        self.dx = int(self.speed_level*(new_orientation[0]))
+        self.dy = int(self.speed_level*(new_orientation[1]))
+        self.orientation = new_orientation
         
     def set_new_speed(self,new_level):
         self.speed_level = 1*new_level
