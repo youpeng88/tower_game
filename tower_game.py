@@ -15,8 +15,8 @@ import pygame
 import random
 import math
 from example_menu import main as menu
-from dashedline import draw_dashed_line as draw_dash
-from dashedline2 import draw_dashed_line as draw_dash2
+# from dashedline import draw_dashed_line as draw_dash
+# from dashedline2 import draw_dashed_line as draw_dash2
 
 ### Global Variables
 
@@ -44,18 +44,18 @@ BAR_SIZE = (MAP_SIZE[0],SCREEN_SIZE[1]-3*MARGIN-MAP_SIZE[0],)
 DIMENSIONS = (20,20)
 
 #PC Dictionary relating object type to the image files it uses and its dimensions
-#IMAGE_DICT = {}
-#IMAGE_DICT["base_tower"] = ("base_tower.png", (20, 40))
-#IMAGE_DICT["defense_tower"] = ("defense_tower.png", (20, 20))
-#IMAGE_DICT["enemy"] = ("enemy.png", (20, 20))
-#IMAGE_DICT["background"] = ("brick_wall.png", MAP_SIZE)
+IMAGE_DICT = {}
+IMAGE_DICT["base_tower"] = ("base_tower.png", (20, 40))
+IMAGE_DICT["defense_tower"] = ("defense_tower.png", (20, 20))
+IMAGE_DICT["enemy"] = ("enemy.png", (20, 20))
+IMAGE_DICT["background"] = ("brick_wall.png", MAP_SIZE)
 #
  # MAC Dictionary relating object type to the image files it uses and its dimensions
-IMAGE_DICT = {}
-IMAGE_DICT["base_tower"] = ("base_tower.bmp", (20, 40))
-IMAGE_DICT["defense_tower"] = ("defense_tower.bmp", (20, 20))
-IMAGE_DICT["enemy"] = ("enemy.bmp", (20, 20))
-IMAGE_DICT["background"] = ("brick_wall.bmp", MAP_SIZE)
+# IMAGE_DICT = {}
+# IMAGE_DICT["base_tower"] = ("base_tower.bmp", (20, 40))
+# IMAGE_DICT["defense_tower"] = ("defense_tower.bmp", (20, 20))
+# IMAGE_DICT["enemy"] = ("enemy.bmp", (20, 20))
+# IMAGE_DICT["background"] = ("brick_wall.bmp", MAP_SIZE)
 #IMAGE_DICT["gold_icon"] = 
 
 # define screen
@@ -84,6 +84,7 @@ def map_border():
 
 def calc_distance (obj1, obj2):
     distance = math.sqrt((obj2[0]-obj1[0])**2 + (obj2[1]-obj1[1])**2)
+    distance = int(distance)
     return distance
 
 def update_text(screen, message, location):
@@ -340,11 +341,11 @@ class Board:
 
     def draw_laser_line(self, enemy_position, tower_position):
         # draws normal solid line
-        # pygame.draw.line(self.screen, black, tower_position, enemy_position, 2)
+         pygame.draw.line(self.screen, black, tower_position, enemy_position, 2)
         
         # if we want to draw dashed line
         #draw_dash(self.screen, black, tower_position, enemy_position, dash_length = 5)
-        draw_dash2(self.screen, green, tower_position, enemy_position, width = 2, dash_length = 5)
+        # draw_dash2(self.screen, green, tower_position, enemy_position, width = 2, dash_length = 5)
         
 class Game_obj(pygame.sprite.Sprite):
     def __init__(self, board, time, position, obj_type, init_HP, attack_power):
@@ -448,24 +449,23 @@ class Enemies(Game_obj):
         super(Enemies,self).__init__(board, time, position, obj_type, init_HP, attack_power)
         self.position = position
         self.orientation = (0, 1) #points up initially
-        self.speed_level = 1*level
+        self.speed_level = 10*level
         self.dx = 0
         self.dy = 0
         self.point_at_base(board)
 
     def point_at_base(self, board): # moving direction
-        direction = (board.base_tower.position[0] - self.position[0], board.base_tower.position[1] - self.position[1])
-#        distance = calc_distance(self.position, board.base_tower.position)
-        distance = 500
+        direction = (float(board.base_tower.position[0] - self.position[0]), float(board.base_tower.position[1] - self.position[1]))
+        distance = calc_distance(self.position, board.base_tower.position)
         new_orientation = (direction[0]/distance, direction[1]/distance)
-        orientation_change = (new_orientation[0] - self.orientation[0], new_orientation[1]- self.orientation[1])
+        orientation_change = (new_orientation[0] - self.orientation[0], new_orientation[1] - self.orientation[1])
         #from orientation_change calculate the degree of rotation, then rotate the image accordingly
         angle = math.atan2(orientation_change[1], orientation_change[0])
         angle = math.degrees(angle)
-        # self.image = pygame.transform.rotate(self.image, angle)
+        #self.image = pygame.transform.rotate(self.image, angle)
+        self.dx = int(self.speed_level*(new_orientation[0]))
+        self.dy = int(self.speed_level*(new_orientation[1]))
         self.orientation = new_orientation
-        self.dx = self.speed_level*(self.orientation[0])
-        self.dy = self.speed_level*(self.orientation[1])
 
     def set_new_speed(self,new_level):
         self.speed_level = 1*new_level
