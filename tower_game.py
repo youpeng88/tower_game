@@ -170,14 +170,18 @@ def main_loop(screen, board, starting_varaibles, clock):
     border = map_border()
     events = pygame.event.get()
     event_types = [event.type for event in events]
-    while pygame.QUIT not in event_types: # when use didn't click exit on the window
+    gameover = False
+    while pygame.QUIT not in event_types and gameover is not True: # when use didn't click exit on the window
+
+         #pygame.display.flip()
 
          # action 1: add tower
          if pygame.mouse.get_pressed()[0]:
              if money >= tower_cost:
                  x,y = pygame.mouse.get_pos()
              # add a defense tower at the location clicked
-                 if board.add_tower_to_board((x,y), HP_tower, defense_range, attack_power_tower):
+                 time = pygame.time.get_ticks()
+                 if board.add_tower_to_board(time, (x,y), HP_tower, defense_range, attack_power_tower):
                      board.towers.draw(screen)
                      pygame.display.flip()
                      money -= tower_cost
@@ -186,7 +190,7 @@ def main_loop(screen, board, starting_varaibles, clock):
          #Updated Action 2 and 5 (move)
          num_border_locs = len(border)
          num_enemies = 2
-         time_period = 3000
+         time_period = 1000
          elapsed_time = pygame.time.get_ticks() - time_created
          #print elapsed_time
          if elapsed_time > time_period:
@@ -194,7 +198,8 @@ def main_loop(screen, board, starting_varaibles, clock):
              while enemies_count < num_enemies: 
                  index = random.randint(0,num_border_locs-1)
                  x,y = border[index]
-                 board.add_enemy_to_board((x,y),speed_level, HP_enemy, attack_power_enemy)
+                 time = pygame.time.get_ticks()
+                 board.add_enemy_to_board(time, (x,y),speed_level, HP_enemy, attack_power_enemy)
                  enemies_count +=1
              time_created = pygame.time.get_ticks()
              wavecount +=1
@@ -219,19 +224,22 @@ def main_loop(screen, board, starting_varaibles, clock):
              
          # action 3: defense attacks enemy (shoot)
          for tower in board.towers:
-             earned = tower.attack()
+             money_earned = tower.attack()
              pygame.display.flip()
-             if earned!= None:
-                 money += earned
+             if money_earned != None:
+                 money += money_earned
                                  
          # action 4: enemy attack defense and base tower
          for enemy in board.enemies:
              collision = enemy.touching_defense_or_base_tower(board)
              if collision is not None:
                  enemy.attack(collision, board)
+                 if board.tower_dict[0] is None:
+                     gameover = True
+                     print "Your Tower is Destroyed!"
              else:
-                 enemy.point_at_base(board)
-                 enemy.update()
+                enemy.point_at_base(board)
+             enemy.update()
 
          # action 5: enemies move    
          # test movement: board.add_enemy_to_board((11,11),speed_level, HP_enemy)
@@ -275,20 +283,21 @@ class Board:
         # Initialize the base Tower
         init_x = MARGIN+MAP_SIZE[0]/2
         init_y = MARGIN+MAP_SIZE[1]/2
+        time = 0
 
-        self.base_tower = Tower(self, (init_x, init_y), "base_tower", HP_base, defense_range, attack_power)
-        self.base_tower_lifebar = Lifebar(self,self.base_tower,screen, HP_base)
+        self.base_tower = Tower(self, time, (init_x, init_y), "base_tower", HP_base, defense_range, attack_power)
+        self.base_tower_lifebar = Lifebar(self, time, self.base_tower,screen, HP_base)
 
         # Initialize the tower dic
         self.tower_dict = {}
-        self.tower_dict[(init_x, init_y)] = self.base_tower
+        self.tower_dict[0] = self.base_tower
 
         # Create life bar dict and Sprite group
         self.lifebar_dict = {}
         self.lifebars = pygame.sprite.Group()
 
         # Add base tower lifebar to lifebar dict and Sprite group
-        self.lifebar_dict[(init_x, init_y)] = self.base_tower_lifebar
+        self.lifebar_dict[0] = self.base_tower_lifebar
         self.lifebars.add(self.base_tower_lifebar)
         
         # Adds Tower to the "towers" Sprite List
@@ -299,34 +308,34 @@ class Board:
         self.enemy_dict = {}
         self.enemies = pygame.sprite.Group()
 
-    def add_tower_to_board(self, position, HP_tower,defense_range, attack_power):
-        defense_tower = Defense_tower(self, position, "defense_tower", HP_tower, defense_range, attack_power)
+    def add_tower_to_board(self, time, position, HP_tower,defense_range, attack_power):
+        defense_tower = Defense_tower(self, time, position, "defense_tower", HP_tower, defense_range, attack_power)
         if defense_tower.rect.x < MARGIN or defense_tower.rect.topright[0] > MARGIN + MAP_SIZE[0] or defense_tower.rect.y < MARGIN or defense_tower.rect.bottomleft[1] > MARGIN + MAP_SIZE[1]:
             return False
         else:
             collision_tower = pygame.sprite.spritecollideany(defense_tower, self.towers, None)
             collision_enemy = pygame.sprite.spritecollideany(defense_tower, self.enemies, None)
             if collision_tower == None and collision_enemy == None:
-                self.tower_dict[(position[0], position[1])] = defense_tower
+                self.tower_dict[time] = defense_tower
                 self.towers.add(defense_tower)
-                defense_tower_lifebar = Lifebar(self, defense_tower, self.screen, HP_tower)
+                defense_tower_lifebar = Lifebar(self, time, defense_tower, self.screen, HP_tower)
 
             # Add defense tower lifebar to lifebar dict and Sprite group
-                self.lifebar_dict[(position[0], position[1])] = defense_tower_lifebar
+                self.lifebar_dict[time] = defense_tower_lifebar
                 self.lifebars.add(defense_tower_lifebar)
                 return True
 
-    def add_enemy_to_board(self, position, speed_level, HP_enemy, attack_power):
-        enemy = Enemies(self, position, "enemy", HP_enemy, speed_level, attack_power)
+    def add_enemy_to_board(self, time, position, speed_level, HP_enemy, attack_power):
+        enemy = Enemies(self, time, position, "enemy", HP_enemy, speed_level, attack_power)
         collision_tower = pygame.sprite.spritecollideany(enemy, self.towers, None)
         collision_enemy = pygame.sprite.spritecollideany(enemy, self.enemies, None)
         if collision_tower is None and collision_enemy is None:
-            self.enemy_dict[(position[0], position[1])] = enemy
+            self.enemy_dict[time] = enemy
             self.enemies.add(enemy)
-            enemy_lifebar = Lifebar(self, enemy, self.screen, HP_enemy)
+            enemy_lifebar = Lifebar(self, time, enemy, self.screen, HP_enemy)
 
             # Add defense tower lifebar to lifebar dict and Sprite group
-            self.lifebar_dict[(position[0], position[1])] = enemy_lifebar
+            self.lifebar_dict[time] = enemy_lifebar
             self.lifebars.add(enemy_lifebar)
 
     def draw_laser_line(self, enemy_position, tower_position):
@@ -338,8 +347,9 @@ class Board:
         draw_dash2(self.screen, green, tower_position, enemy_position, width = 2, dash_length = 5)
         
 class Game_obj(pygame.sprite.Sprite):
-    def __init__(self, board, position, obj_type, init_HP, attack_power):
+    def __init__(self, board, time, position, obj_type, init_HP, attack_power):
         pygame.sprite.Sprite.__init__(self)
+        self.time = time
         self.board = board
         self.position = position
         self.dimensions = IMAGE_DICT[obj_type][1]
@@ -356,14 +366,14 @@ class Game_obj(pygame.sprite.Sprite):
         # self.rect.topleft = (position[0] + self.dimensions[0]/2, position[1] + self.dimensions[1]/2)
 
 class Lifebar(pygame.sprite.Sprite):
-    def __init__(self, board, boss, screen, full_HP):
+    def __init__(self, time, board, boss, screen, full_HP):
         pygame.sprite.Sprite.__init__(self)
+        self.time = time
         self.boss = boss
         self.screen = screen
         self.position = (self.boss.position[0] - self.boss.dimensions[0]/2, self.boss.position[1] + self.boss.dimensions[1]/2) # lifebar is positioned directly below its boss (game object)
         self.dimensions = (self.boss.dimensions[0],10) #lifebar is same width as its boss and 10 pixels high
         self.HP = self.boss.HP
-        #super(Lifebar,self).__init__(board, self.position, self.dimensions, self.HP)
         self.board = board
         self.set_pic()
         pygame.draw.rect(self.screen, (0,255,0), (self.position,self.dimensions))
@@ -385,32 +395,35 @@ class Lifebar(pygame.sprite.Sprite):
             self.oldHP = self.boss.HP
 
 class Tower(Game_obj):
-    def __init__(self, board, position, obj_type, init_HP,defense_range, attack_power):
-        super(Tower, self).__init__(board, position, obj_type, init_HP, attack_power)
+    def __init__(self, board, time, position, obj_type, init_HP, defense_range, attack_power):
+        super(Tower, self).__init__(board, time, position, obj_type, init_HP, attack_power)
         self.defense_range = defense_range
     
     def attack(self):
-        money = None
+        money = 0
         attack_enemy = self.closest_enemy()
         if attack_enemy != None:
             enemy_position =  attack_enemy.position                  
             self.board.draw_laser_line(enemy_position, self.position)
             attack_enemy.HP -= self.attack_power                 
-            if attack_enemy.HP < 0:
-                attack_enemy.enemy_death()
+            if attack_enemy.HP <= 0:
+                attack_enemy.enemy_death(self.board)
                 money = 50
         return money
-       
 
     def tower_death(self, board):
         # need to remove the object from the board
         # from dic list
-        board.tower_dict[(self.position[0], self.position[1])] = None
-        self.position = (20,20)
-        # lifebar.kill()
-        # from sprite group
+        time = self.time
+        board.tower_dict[time] = None
+        lifebar = board.lifebar_dict[time]
+        lifebar.kill()
+        board.lifebar_dict[time] = None
+
         self.kill()
-        
+        self.update()
+        lifebar.update()
+
     def closest_enemy(self):
         e_position = None
         final_enemy = None
@@ -426,13 +439,13 @@ class Tower(Game_obj):
 
 
 class Defense_tower(Tower):
-    def __init__(self, board, position, obj_type, init_HP, defense_range, attack_power):
-        super(Defense_tower,self).__init__(board, position, obj_type, init_HP, defense_range, attack_power)
+    def __init__(self, board, time, position, obj_type, init_HP, defense_range, attack_power):
+        super(Defense_tower,self).__init__(board, time, position, obj_type, init_HP, defense_range, attack_power)
 
 
 class Enemies(Game_obj):
-    def __init__(self, board, position, obj_type, init_HP, level, attack_power):
-        super(Enemies,self).__init__(board, position, obj_type, init_HP, attack_power)
+    def __init__(self, board, time, position, obj_type, init_HP, level, attack_power):
+        super(Enemies,self).__init__(board, time, position, obj_type, init_HP, attack_power)
         self.position = position
         self.orientation = (0, 1) #points up initially
         self.speed_level = 1*level
@@ -445,13 +458,12 @@ class Enemies(Game_obj):
 #        distance = calc_distance(self.position, board.base_tower.position)
         distance = 500
         new_orientation = (direction[0]/distance, direction[1]/distance)
-#        orientation_change = (new_orientation[0] - self.orientation[0], new_orientation[1]- self.orientation[1])
-#        #from orientation_change calculate the degree of rotation, then rotate the image accordingly
-#        angle = math.atan2(orientation_change[1], orientation_change[0])
-#        angle = math.degrees(angle)
-#        self.image = pygame.transform.rotate(self.image, angle)
-
-        self.orientation = new_orientation;
+        orientation_change = (new_orientation[0] - self.orientation[0], new_orientation[1]- self.orientation[1])
+        #from orientation_change calculate the degree of rotation, then rotate the image accordingly
+        angle = math.atan2(orientation_change[1], orientation_change[0])
+        angle = math.degrees(angle)
+        # self.image = pygame.transform.rotate(self.image, angle)
+        self.orientation = new_orientation
         self.dx = self.speed_level*(self.orientation[0])
         self.dy = self.speed_level*(self.orientation[1])
 
@@ -460,15 +472,20 @@ class Enemies(Game_obj):
 
     def attack(self, collision, board):
         collision.HP -= self.attack_power
-        if collision.HP < 0:
+        if collision.HP <= 0:
             collision.tower_death(board)
 
-    def enemy_death(self):
+    def enemy_death(self, board):
         # need to remove the object from the board
         # from dic list
-        self.board.enemy_dict[(self.position[0], self.position[1])] = None
-        # from sprite group
+        time = self.time
+        board.enemy_dict[time] = None
+        lifebar = board.lifebar_dict[time]
+        lifebar.kill()
+        board.lifebar_dict[time] = None
         self.kill()
+        self.update()
+        lifebar.update()
         
     def touching_defense_or_base_tower(self, board):
         collision = pygame.sprite.spritecollideany(self, board.towers, collided=None)
@@ -484,14 +501,14 @@ class Enemies(Game_obj):
         self.rect = self.rect.move(self.dx,self.dy)
         self.position = self.rect.center
 
-my_game = new_game(screen)
+#my_game = new_game(screen)
 
-#results = menu(screen) # start = None, load = 2
-#if results is None: # This means user selected start game
-#    my_game = new_game(screen)
-#elif results == 2: # user selected LOAD game
-#    with open('saved_state.txt','r') as f:
-#        saved_state = f.readlines() # need to pass this into the game to update the state
-#        print saved_state
-#    my_game = new_game(screen,saved_state)
-## use options to specify difficulty level 
+results = menu(screen) # start = None, load = 2
+if results is None: # This means user selected start game
+    my_game = new_game(screen)
+elif results == 2: # user selected LOAD game
+    with open('saved_state.txt','r') as f:
+        saved_state = f.readlines() # need to pass this into the game to update the state
+        print saved_state
+    my_game = new_game(screen,saved_state)
+# use options to specify difficulty level 
