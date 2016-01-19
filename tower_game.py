@@ -192,10 +192,10 @@ def new_game(saved_stats = None, highscore_archive = None, level = 1):
     attack_power_tower = [2,3,4]
     attack_power_enemy = [5,5,5]
     tower_cost = [500,500,500]
+    money_earned_per_enemy = 50
     
     defense_range_base = [15,20,25]
     attack_power_base = [5,8,10]
-    
 
     starting_varaibles = [HP_enemy[difficulty-1],
                           HP_tower[difficulty-1],
@@ -209,7 +209,9 @@ def new_game(saved_stats = None, highscore_archive = None, level = 1):
                           tower_list, score,
                           difficulty,
                           highscores,
-                          username]
+                          username,
+                          money_earned_per_enemy]
+    
     board = Board(HP_base[difficulty-1],screen,defense_range_base[difficulty-1], attack_power_base[difficulty-1])
 
     clock = pygame.time.Clock()
@@ -232,6 +234,7 @@ def main_loop(screen, board, starting_varaibles, clock):
     difficulty = starting_varaibles[12]
     highscores = starting_varaibles[13]
     username = starting_varaibles[14]
+    money_earned_per_enemy = starting_varaibles[15]
 
     time_created = 0
 
@@ -286,16 +289,21 @@ def main_loop(screen, board, starting_varaibles, clock):
                      index = random.randint(0,num_border_locs-1)
                      x,y = border[index]
                      time = pygame.time.get_ticks()
-                     board.add_enemy_to_board(time, (x,y),speed_level, HP_enemy, attack_power_enemy)
+                     board.add_enemy_to_board(time, (x,y),speed_level, HP_enemy, attack_power_enemy,money_earned_per_enemy)
                      enemies_count +=1
                  time_created = pygame.time.get_ticks()
                  wavecount +=1
-                 
+            # Increase enemy HP by 10 and amount of money earned by 5 every 10 waves 
+             if wavecount % 10 == 0:
+                 HP_enemy += 10
+                 money_earned_per_enemy += 5                 
+             
              # action 3: defense attacks enemy (shoot)
              for tower in board.towers:
                  money_earned = tower.attack()
                  score += money_earned*difficulty
                  pygame.display.flip()
+                 clock.tick(100)
                  if money_earned != None:
                      money += money_earned
                                      
@@ -312,10 +320,6 @@ def main_loop(screen, board, starting_varaibles, clock):
                     enemy.point_at_base(board)
                  enemy.update()
     
-             # action 5: enemies move    
-             # test movement: board.add_enemy_to_board((11,11),speed_level, HP_enemy)
-    #         board.enemies.update()
-    
             # call sidebar        
              sidebar(screen, tower_number, money, wavecount,difficulty,score)
     #        screen.fill(black) # (0,0,0) represents RGB for black
@@ -326,8 +330,6 @@ def main_loop(screen, board, starting_varaibles, clock):
              # update life bar
              board.lifebars.update()
              # board.lifebars.draw(screen)
-             pygame.display.flip()
-             clock.tick(100)
         
              events = pygame.event.get()
              event_types = [event.type for event in events] # update event list
@@ -353,11 +355,6 @@ def main_loop(screen, board, starting_varaibles, clock):
                 Start_screen.fill(black)
                 pygame.display.set_caption("HighScore Leaderboard")  
                 display_high_score(Start_screen, highscores)
-#                location = 1
-#                inputask.update_text(Start_screen, "High Scores", location, 24)
-#                for user in highscores:
-#                    location +=1
-#                    inputask.update_text(Start_screen, user.name + ": "+ str(user.score), location, 20)
                 pygame.time.wait(4000) 
                 break
             
@@ -372,16 +369,7 @@ def main_loop(screen, board, starting_varaibles, clock):
                     inputask.display_box(Start_screen, "Please enter a string")
             highscores.insert(user, User_Score(username, score))
             break
-
-        # display high scores
-#        Start_screen.fill(black)
-#        pygame.display.set_caption("HighScore Leaderboard")        
-#        location = 1
-#        inputask.update_text(Start_screen, "High Scores", location)
-#        for user in highscores:
-#            location +=1
-#            inputask.update_text(Start_screen, user.name + ": "+ str(user.score), location)
-#        pygame.time.wait(4000)  
+ 
         pygame.display.quit()
         mainloop = False
         
@@ -462,8 +450,8 @@ class Board:
                 self.lifebars.add(defense_tower_lifebar)
                 return True
 
-    def add_enemy_to_board(self, time, position, speed_level, HP_enemy, attack_power):
-        enemy = Enemies(self, time, position, "enemy", HP_enemy, speed_level, attack_power)
+    def add_enemy_to_board(self, time, position, speed_level, HP_enemy, attack_power, money_earned_per_enemy):
+        enemy = Enemies(self, time, position, "enemy", HP_enemy, speed_level, attack_power, money_earned_per_enemy)
         collision_tower = pygame.sprite.spritecollideany(enemy, self.towers, None)
         collision_enemy = pygame.sprite.spritecollideany(enemy, self.enemies, None)
         if collision_tower is None and collision_enemy is None:
@@ -553,8 +541,7 @@ class Tower(Game_obj):
             self.board.draw_laser_line(enemy_position, self.position)
             attack_enemy.HP -= self.attack_power                 
             if attack_enemy.HP <= 0:
-                attack_enemy.enemy_death(self.board)
-                money = 50
+                money = attack_enemy.enemy_death(self.board)
         return money
 
     def tower_death(self, board):
@@ -590,7 +577,7 @@ class Defense_tower(Tower):
 
 
 class Enemies(Game_obj):
-    def __init__(self, board, time, position, obj_type, init_HP, level, attack_power):
+    def __init__(self, board, time, position, obj_type, init_HP, level, attack_power, money_earned_per_enemy):
         super(Enemies,self).__init__(board, time, position, obj_type, init_HP, attack_power)
         self.position = position
         self.orientation = (0.0, 1.0) #points up initially
@@ -598,6 +585,7 @@ class Enemies(Game_obj):
         self.dx = 0
         self.dy = 0
         self.point_at_base(board)
+        self.money_earned_per_enemy = money_earned_per_enemy
 
     def point_at_base(self, board): # moving direction
 #        direction = (board.base_tower.position[0] - self.position[0], board.base_tower.position[1] - self.position[1])
@@ -648,6 +636,7 @@ class Enemies(Game_obj):
         self.kill()
         self.update()
         lifebar.update()
+        return self.money_earned_per_enemy
         
     def touching_defense_or_base_tower(self, board):
         collision = pygame.sprite.spritecollideany(self, board.towers, collided=None)
