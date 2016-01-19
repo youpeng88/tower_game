@@ -11,7 +11,8 @@
     1-19-16(2:31pm): added sidebar icon for score, addeed highscore display on main menu (click to go back to main menu)
     1-19-16(2:47pm): Zach's recent changes merged (stronger enemy and gives more money)
     1-19-16(3:20pm): added PC and MAC choices at the start menu (remembers previous selection if don't change platform choice)
-     1-19-16(5:10pm): Alex's recent changes merged (turn_based appearance) also fixed box input to make it a larger box (and some small bugs)
+    1-19-16(5:10pm): Alex's recent changes merged (turn_based appearance) also fixed box input to make it a larger box (and some small bugs)
+    1-19-16(6:30pm): added Instruction buttom on the start menu and merged the changes. 
 
 #Latest Change by Zach:
     12:41 AM: Modified Enemies.point_at_base function such that all enemies now target base
@@ -34,3 +35,4 @@
     1-19-16(2:47pm): Zach's recent changes merged (stronger enemy and gives more money)
     1-19-16(3:20pm): Yoyo's recent changes merged (added PC and MAC choices at the start menu (remembers previous selection if don't change platform choice)
     1-19-16(5:10pm): Alex's recent changes merged (turn_based appearance, also fixed box input)
+    1-19-16(6:30pm): Yoyo's recent changes merged (added instruction buttom)
