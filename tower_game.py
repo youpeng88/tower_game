@@ -203,7 +203,7 @@ def new_game(saved_stats = None, highscore_archive = None, level = 1, extension 
     HP_enemy = [100, 150, 200]
     HP_tower = [500, 500, 600]
     HP_base = [1000, 1200, 1200]
-    speed_level = [2,4,6]
+    speed_level = [1,2,3]
     defense_range = [200, 150, 100]
     attack_power_tower = [2,3,4]
     attack_power_enemy = [5,5,5]
@@ -253,7 +253,6 @@ def main_loop(screen, board, starting_varaibles, clock):
     money_earned_per_enemy = starting_varaibles[15]
 
     time_created = 0
-
     # setup background
     BackGround = Background("background", [MARGIN, MARGIN])
     screen.blit(BackGround.image, BackGround.rect)
@@ -300,7 +299,6 @@ def main_loop(screen, board, starting_varaibles, clock):
              num_enemies = 2
              time_period = 1000
              elapsed_time = pygame.time.get_ticks() - time_created
-    
              if loop_number - loop_created > 10:
                  enemies_count = 0
                  while enemies_count < num_enemies:
@@ -313,9 +311,9 @@ def main_loop(screen, board, starting_varaibles, clock):
                  time_created = pygame.time.get_ticks()
                  wavecount +=1
             # Increase enemy HP by 10 and amount of money earned by 5 every 10 waves 
-             if wavecount % 10 == 0:
-                 HP_enemy += 10
-                 money_earned_per_enemy += 5                 
+                 if wavecount % 10 == 0: 
+                     HP_enemy += 10
+                     money_earned_per_enemy += 5                 
              
              # action 3: defense attacks enemy (shoot)
              for tower in board.towers:
@@ -610,24 +608,6 @@ class Enemies(Game_obj):
         self.money_earned_per_enemy = money_earned_per_enemy
 
     def point_at_base(self, board): # moving direction
-#        direction = (board.base_tower.position[0] - self.position[0], board.base_tower.position[1] - self.position[1])
-#        new_orientation = [0, 0]
-#
-#        if direction[0] < 0:
-#            new_orientation[0] = -1
-#        elif direction[0] == 0:
-#            new_orientation[0] = 0
-#        elif direction[0] > 0:
-#            new_orientation[0] = 1
-#        if direction[1] < 0:
-#            new_orientation[1] = -1
-#        elif direction[1] == 0:
-#            new_orientation[1] = 0
-#        elif direction[1] > 0:
-#            new_orientation[1] = 1
-#        self.dx = self.speed_level*new_orientation[0]
-#        self.dy = self.speed_level*new_orientation[1]
-
         direction = (float(board.base_tower.position[0] - self.position[0]), float(board.base_tower.position[1] - self.position[1]))
         distance = calc_distance(self.position, board.base_tower.position)
         new_orientation = (direction[0]/distance, direction[1]/distance)
@@ -688,7 +668,6 @@ def start_menu():
     pygame.display.set_caption("Menu") # caption sets title of Window
     Start_screen.fill(black) # (0,0,0) represents RGB for black
     results = menu(Start_screen) # start = None, load = 2
-    
     #load high score
     f = open('highscores.txt','r')
     highscore_archive = f.readlines()
