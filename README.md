@@ -13,5 +13,6 @@
     1-18-16 10:35am: Changed the Enemy.point_at_base function and the angle function to allow proper rotation. The angle calculation now takes two vectors, and using the dot product calculates the angle between the vectors, rotating the appropriate ammount. In order to prevent rotation on every turn, if angle is less than 1 the enemy does not rotate. The angle function catches divide by zero exceptions.
     1-18-16 11:10am: Modified the .png images for the sprites on the board to be transparent. For pygame on Windows the game can now have transparent pieces. It looks better? Maybe a better background?
     1-19-16 00:10am: Modified the save and load functionality to keep the defense_towers from the previous game upon load game.
+    1-19-16 02:26am: Added a highscore archive to keep track of and display highscores. This involved: creating a highscore class, saving the score, adding user input for name, calling the scores at the beginning. Also changed to grass background.
 
 
