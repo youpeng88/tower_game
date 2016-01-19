@@ -54,7 +54,7 @@ DIMENSIONS = (20,20)
 #IMAGE_DICT["tower_icon"] = ("defense_tower_icon.png", (15,15))
 #IMAGE_DICT["enemy_icon"] = ("enemy_icon.png", (15,15))
 #IMAGE_DICT["level"] = ("level.png", (15,15))
-#
+
 #MAC Dictionary relating object type to the image files it uses and its dimensions
 IMAGE_DICT = {}
 IMAGE_DICT["base_tower"] = ("base_tower.bmp", (20, 40))
@@ -342,7 +342,7 @@ def main_loop(screen, board, starting_varaibles, clock):
     
         pygame.display.quit()
         pygame.init()
-        Start_screen = pygame.display.set_mode([MAP_SIZE[0],200])
+        Start_screen = pygame.display.set_mode([MAP_SIZE[0],300])
         pygame.display.set_caption("HighScore") # caption sets title of Window
         Start_screen.fill(black) # (0,0,0) represents RGB for black
         for user in range(len(highscores)):
@@ -359,6 +359,7 @@ def main_loop(screen, board, starting_varaibles, clock):
                         inputask.display_box(Start_screen, "Please enter a string")
                 highscores.insert(user, User_Score(username, score))
                 break
+            
         highscores = highscores[0:10]
         
         if highscores == []:
@@ -370,18 +371,15 @@ def main_loop(screen, board, starting_varaibles, clock):
                     inputask.display_box(Start_screen, "Please enter a string")
             highscores.insert(user, User_Score(username, score))
             break
-        
+
         # display high scores
         Start_screen.fill(black)        
         location = 1
         inputask.update_text(Start_screen, "High Scores", location)
         for user in highscores:
             location +=1
-            inputask.update_text(Start_screen, user.name + str(user.score), location)
-            
-
-        pygame.time.wait(5000)
-        
+            inputask.update_text(Start_screen, user.name + ": "+ str(user.score), location)
+        pygame.time.wait(5000)  
         pygame.display.quit()
         mainloop = False
         
@@ -503,12 +501,12 @@ class Board:
 
     def draw_laser_line(self, enemy_position, tower_position):
         # draws normal solid line
-        # pygame.draw.line(self.screen, black, tower_position, enemy_position, 2)
+#        pygame.draw.line(self.screen, black, tower_position, enemy_position, 2)
         
         # if we want to draw dashed line
         #draw_dash(self.screen, black, tower_position, enemy_position, dash_length = 5)
         draw_dash2(self.screen, red, tower_position, enemy_position, width = 2, dash_length = 5)
-        
+       
 class Game_obj(pygame.sprite.Sprite):
     def __init__(self, board, time, position, obj_type, init_HP, attack_power):
         pygame.sprite.Sprite.__init__(self)
@@ -540,23 +538,32 @@ class Lifebar(pygame.sprite.Sprite):
         self.board = board
         self.set_pic()
         pygame.draw.rect(self.screen, (0,255,0), (self.position,self.dimensions))
-        self.oldHP = 0
         self.full_HP = full_HP
+        self.update_Lifebar_text()
 
     def set_pic(self):
         self.image = pygame.Surface(self.dimensions)
         self.image.set_colorkey((0,0,0)) # black transparent
-#        self.rect = self.image.get_rect()
-#        self.rect.topleft = self.position       
+
+    def update_Lifebar_text(self):
+        textSize = 10
+        font = pygame.font.Font(None, 20)
+        textx = 0 + textSize
+        text = font.render(str(self.boss.HP) + "/" + str(self.full_HP), True, white)
+        textRect = text.get_rect()
+        textRect.y = self.position[1] - 15
+        textRect.centerx = self.boss.rect.center[0]
+        self.screen.blit(text, textRect)
    
     def update(self):
-            self.position = (self.boss.rect.center[0] - self.boss.dimensions[0]/2, self.boss.rect.center[1] - 7 - self.boss.dimensions[1]/2)
-            
-            self.frac = float(self.boss.HP) / float(self.full_HP)
-            pygame.draw.rect(self.screen, (0,0,0), (self.position,self.dimensions)) # fill black
-            pygame.draw.rect(self.screen, (0,255,0), (self.position,(int(self.boss.dimensions[0] * self.frac),self.dimensions[1])),0) # fill green
-            self.oldHP = self.boss.HP
 
+        self.position = (self.boss.rect.center[0] - self.boss.dimensions[0]/2, self.boss.rect.center[1] - 7 - self.boss.dimensions[1]/2)
+        self.frac = float(self.boss.HP) / float(self.full_HP)
+        pygame.draw.rect(self.screen, (0,0,0), (self.position,self.dimensions)) # fill black
+        pygame.draw.rect(self.screen, (0,255,0), (self.position,(int(self.boss.dimensions[0] * self.frac),self.dimensions[1])),0) # fill green
+
+        self.update_Lifebar_text()
+            
 class Tower(Game_obj):
     def __init__(self, board, time, position, obj_type, init_HP, defense_range, attack_power):
         super(Tower, self).__init__(board, time, position, obj_type, init_HP, attack_power)
@@ -690,7 +697,7 @@ class User_Score(object):
         
 def start_menu():
     pygame.init()
-    Start_screen = pygame.display.set_mode([MAP_SIZE[0],200])
+    Start_screen = pygame.display.set_mode([MAP_SIZE[0],300])
     pygame.display.set_caption("Menu") # caption sets title of Window
     Start_screen.fill(black) # (0,0,0) represents RGB for black
     results = menu(Start_screen) # start = None, load = 2
