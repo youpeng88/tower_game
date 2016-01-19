@@ -5,6 +5,7 @@
     10:32am (monday): added icons to the side bar and moved life bar above with some space (Alex's changes is merged)
     10:40 am (monday): added Alex's recent change with rotation
     1-19-16: Alex's change merged
+    1-19-16 12:00pm: user input name (new window), display top 10 high score, goes back to start menu
 
 #Latest Change by Zach:
     12:41 AM: Modified Enemies.point_at_base function such that all enemies now target base
@@ -18,3 +19,4 @@
 
 # Latest Version: 
     1-19-16: Alex's recnet change merged (grass backgorund, userinput name and high score)
+    1-19-16 (12pm): Yoyo's recent changes merged (user input name, display high score and goes back to start menu)
