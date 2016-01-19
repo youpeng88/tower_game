@@ -8,6 +8,7 @@
     1-19-16 12:00pm: user input name (new window), display top 10 high score, goes back to start menu
     1-19-16 (12:16pm): Zach's recent changes merged (life bar with number)
     1-19-16(1:06pm): added level of difficulty menu after you select start game and can go back to main menu after that if you select back  
+    1-19-16(2:31pm): added sidebar icon for score, addeed highscore display on main menu (click to go back to main menu)
 
 #Latest Change by Zach:
     12:41 AM: Modified Enemies.point_at_base function such that all enemies now target base
@@ -25,3 +26,4 @@
     1-19-16 (12pm): Yoyo's recent changes merged (user input name, display high score and goes back to start menu)
     1-19-16 (12:16pm): Zach's recent changes merged (life bar with number)
     1-19-16(1:06pm): Yoyo's recent changes merged (difficulty level menu and parameters, display on side bar)
+    1-19-16(2:31pm): Yoyo's recent changes merged (added sidebar icon for score, addeed highscore display on main menu (click to go back to main menu))
