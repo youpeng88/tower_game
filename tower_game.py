@@ -136,15 +136,30 @@ def new_game(screen,saved_stats = None):
     of power tower.
     """
     #pygame.init() # initialize all imported pygame modules
-    
+
     if saved_stats != None:
         tower_number = int(saved_stats[0])
         money = int(saved_stats[1])
         wavecount = int(saved_stats[2])
+        tower_list = []
+        if len(saved_stats) > 3:
+            for i in range(3, len(saved_stats)):
+                print saved_stats[i]
+                for j in range(len(saved_stats[i])):
+                    if saved_stats[i][j] == ",":
+                        for k in range(len(saved_stats[i])):
+                            if saved_stats[i][k] == "+":
+                                x = int(saved_stats[i][1:j])
+                                y = int(saved_stats[i][j+2:k-1])
+                                time = int(saved_stats[i][k+1:len(saved_stats[i])-1])
+                                if time != 0:
+                                    tower_list.append([time, (x,y)])
+        print tower_list
     else:
         tower_number = 1
         money = 5000
         wavecount = 0
+        tower_list = None
         
     # other starting variables, modified by the setting chosen in the opening menu
     HP_enemy = 100
@@ -159,7 +174,7 @@ def new_game(screen,saved_stats = None):
     defense_range_base = 15
     attack_power_base = 5
 
-    starting_varaibles = [HP_enemy, HP_tower, speed_level, tower_number, wavecount, money, defense_range, tower_cost, attack_power_tower, attack_power_enemy]
+    starting_varaibles = [HP_enemy, HP_tower, speed_level, tower_number, wavecount, money, defense_range, tower_cost, attack_power_tower, attack_power_enemy, tower_list]
 
     board = Board(HP_base,screen,defense_range_base, attack_power_base)
 
@@ -178,6 +193,7 @@ def main_loop(screen, board, starting_varaibles, clock):
     tower_cost = starting_varaibles[7]
     attack_power_tower = starting_varaibles[8]
     attack_power_enemy = starting_varaibles[9]
+    tower_list = starting_varaibles[10]
 
     time_created = 0
 
@@ -185,7 +201,15 @@ def main_loop(screen, board, starting_varaibles, clock):
     BackGround = Background("background", [MARGIN, MARGIN])
     screen.blit(BackGround.image, BackGround.rect)
     pygame.display.flip()
-    
+
+    if starting_varaibles[10] is not None:
+        for i in range(len(starting_varaibles[10])):
+            time = starting_varaibles[10][i][0]
+            position = starting_varaibles[10][i][1]
+            if board.add_tower_to_board(time, position, HP_tower, defense_range, attack_power_tower):
+                board.towers.draw(screen)
+                pygame.display.flip()
+
 
     board.towers.draw(screen) # draw tower Sprite
     pygame.display.flip()
@@ -284,12 +308,22 @@ def main_loop(screen, board, starting_varaibles, clock):
     
          events = pygame.event.get()
          event_types = [event.type for event in events] # update event list
+
+         with open('saved_state.txt','w') as f:
+            f.write(str(tower_number)+"\n")
+            f.write(str(money)+"\n")
+            f.write(str(wavecount)+"\n")
+            for tower in board.towers:
+                f.write(str(tower.position)+"+"+str(tower.time) + "\n")
+         f.close()
          
-    with open('saved_state.txt','w') as f:
-#        f.writelines([str(tower_number), str(money), str(wavecount)])
-        f.write(str(tower_number)+"\n")
-        f.write(str(money)+"\n")
-        f.write(str(wavecount)+"\n")
+#     with open('saved_state.txt','w') as f:
+# #        f.writelines([str(tower_number), str(money), str(wavecount)])
+#         f.write(str(tower_number)+"\n")
+#         f.write(str(money)+"\n")
+#         f.write(str(wavecount)+"\n")
+#         for tower in board.towers:
+#             f.write(str(tower.position)+"+"+str(tower.time) + "\n")
 
 class Background(pygame.sprite.Sprite):
     def __init__(self, obj_type, position):
