@@ -108,11 +108,9 @@ def main(screen):
             return 2
          elif state == 3:
             print 'Options!'
-            state = 0
             return 3
          elif state == 4:
             print 'High Scores'
-            state = 0
             return 4
          else:
             print 'Exit!'

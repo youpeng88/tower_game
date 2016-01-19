@@ -31,16 +31,16 @@ red   = (255, 0, 0)
 blue  = (0, 0, 255)
 
 # map size
-MAP_SIZE = (600, 600)  # (width in pixels, height in pixels)
+MAP_SIZE = (700, 600)  # (width in pixels, height in pixels)
 
 # margins (same for all sides)
 MARGIN = 10
 
 # screen size
-SCREEN_SIZE = (MAP_SIZE[1]+2*MARGIN,680)  # (width in pixels, height in pixels)
+SCREEN_SIZE = (MAP_SIZE[0]+2*MARGIN,680)  # (width in pixels, height in pixels)
 
 # bar_size
-BAR_SIZE = (MAP_SIZE[0],SCREEN_SIZE[1]-3*MARGIN-MAP_SIZE[0])
+BAR_SIZE = (MAP_SIZE[0],SCREEN_SIZE[1]-3*MARGIN-MAP_SIZE[1])
 
 # default dimensions
 DIMENSIONS = (20,20)
@@ -55,6 +55,7 @@ DIMENSIONS = (20,20)
 #IMAGE_DICT["tower_icon"] = ("defense_tower_icon.png", (15,15))
 #IMAGE_DICT["enemy_icon"] = ("enemy_icon.png", (15,15))
 #IMAGE_DICT["level"] = ("level.png", (15,15))
+#IMAGE_DICT["score"] = ("score.png", (15,15))
 
 #MAC Dictionary relating object type to the image files it uses and its dimensions
 IMAGE_DICT = {}
@@ -66,6 +67,7 @@ IMAGE_DICT["gold_icon"] = ("gold_coins.bmp", (15,15))
 IMAGE_DICT["tower_icon"] = ("defense_tower_icon.bmp", (15,15))
 IMAGE_DICT["enemy_icon"] = ("enemy_icon.bmp", (15,15))
 IMAGE_DICT["level"] = ("level.bmp", (15,15))
+IMAGE_DICT["score"] = ("score_icon.bmp", (15,15))
 
 # define start screen
 pygame.init()
@@ -120,22 +122,24 @@ def update_text(screen, message, location,obj_type):
     text = font.render(message, True, white, black)
     textRect = text.get_rect()
     textRect.centery = 2*MARGIN + MAP_SIZE[1] + BAR_SIZE[1]/2
-    textRect.centerx = MARGIN+70+textx*(location-1)*7
+    textRect.x = MARGIN+50+textx*(location-1)*6
     screen.blit(text, textRect)
     icon = Background(obj_type, [textRect.x - 20, textRect.y])
     screen.blit(icon.image, icon.rect)
 
-def sidebar(screen, tower_number, money, wavecount, level):
+def sidebar(screen, tower_number, money, wavecount, level, score):
     screen.fill(black)
     update_text(screen, "Tower #: " + str(tower_number), 1, "tower_icon")
     update_text(screen, "Money: " + str(money), 2, "gold_icon")
     update_text(screen, "Wave #: " + str(wavecount), 3, "enemy_icon") 
+    update_text(screen, "Score #: " + str(score), 4, "score")
     if level == 1:
-        update_text(screen, "Difficulty Level: Easy", 4, "level") 
+        update_text(screen, "Difficulty Level: Easy", 5, "level") 
     elif level == 2:
-        update_text(screen, "Difficulty Level: Medium", 4, "level") 
+        update_text(screen, "Difficulty Level: Medium", 5, "level") 
     else:
-        update_text(screen, "Difficulty Level: Hard", 4, "level") 
+        update_text(screen, "Difficulty Level: Hard", 5, "level") 
+     
         
 def new_game(saved_stats = None, highscore_archive = None, level = 1):
     """
@@ -177,27 +181,6 @@ def new_game(saved_stats = None, highscore_archive = None, level = 1):
             difficulty = level
     
     highscores = highscore_archive;
-#    highscores = []
-#    if highscore_archive != []:
-#
-#         for i in range(len(highscore_archive)):
-#             for j in range(len(highscore_archive[i])):
-#                 if highscore_archive[i][j] == "+":
-#                    archive_name = highscore_archive[i][0:j]
-#                    archive_score = int(highscore_archive[i][j+1:len(highscore_archive[i])-1])
-#                    highscores.append(User_Score(archive_name, archive_score))
-#                    highscores = sorted(highscores, key=getKey, reverse=True)
-#    else:
-#        highscores = [User_Score("--empty--", 0),
-#                      User_Score("--empty--", 0),
-#                      User_Score("--empty--", 0),
-#                      User_Score("--empty--", 0),
-#                      User_Score("--empty--", 0),
-#                      User_Score("--empty--", 0),
-#                      User_Score("--empty--", 0),
-#                      User_Score("--empty--", 0),
-#                      User_Score("--empty--", 0),
-#                      User_Score("--empty--", 0)]
 
     # other starting variables, modified by the setting chosen in the opening menu
     money = [5000, 4000, 2500]
@@ -334,7 +317,7 @@ def main_loop(screen, board, starting_varaibles, clock):
     #         board.enemies.update()
     
             # call sidebar        
-             sidebar(screen, tower_number, money, wavecount,difficulty)
+             sidebar(screen, tower_number, money, wavecount,difficulty,score)
     #        screen.fill(black) # (0,0,0) represents RGB for black
              screen.blit(BackGround.image, BackGround.rect)
              board.towers.draw(screen)
@@ -351,7 +334,7 @@ def main_loop(screen, board, starting_varaibles, clock):
     
         pygame.display.quit()
         pygame.init()
-        Start_screen = pygame.display.set_mode([MAP_SIZE[0],300])
+        Start_screen = pygame.display.set_mode([SCREEN_SIZE[0],300])
         pygame.display.set_caption("HighScore Leaderboard") # caption sets title of Window
         Start_screen.fill(black) # (0,0,0) represents RGB for black
         for user in range(len(highscores)):
@@ -690,7 +673,7 @@ class User_Score(object):
         
 def start_menu(highscore_archive_list):
     pygame.init()
-    Start_screen = pygame.display.set_mode([MAP_SIZE[0],300])
+    Start_screen = pygame.display.set_mode([SCREEN_SIZE[0],300])
     pygame.display.set_caption("Menu") # caption sets title of Window
     Start_screen.fill(black) # (0,0,0) represents RGB for black
     results = menu(Start_screen) # start = None, load = 2
@@ -740,7 +723,6 @@ def display_high_score(screen, highscore_list):
 def convert_score_list(highscore_archive):
     highscores = []
     if highscore_archive != []:
-
          for i in range(len(highscore_archive)):
              for j in range(len(highscore_archive[i])):
                  if highscore_archive[i][j] == "+":
