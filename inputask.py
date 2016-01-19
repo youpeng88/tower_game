@@ -50,10 +50,10 @@ def display_box(screen, message):
   
 def display(screen, message):
   "Print a message n the middle of the screen"
-  fontobject = pygame.font.Font(None,20)
+  fontobject = pygame.font.Font(None,30)
   if len(message) != 0:
       screen.blit(fontobject.render(message, 1, (255,255,255)),
-                ((screen.get_width() / 2) - 120, (screen.get_height() / 2) - 10))
+                ((screen.get_width() / 2) - 170, (screen.get_height() / 2) - 10))
   pygame.display.flip()
   
 def update_text(screen, message, location, fontsize):

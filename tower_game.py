@@ -45,6 +45,9 @@ SCREEN_SIZE = (MAP_SIZE[0]+2*MARGIN,680)  # (width in pixels, height in pixels)
 # bar_size
 BAR_SIZE = (MAP_SIZE[0],SCREEN_SIZE[1]-3*MARGIN-MAP_SIZE[1])
 
+# menu size
+MENU_SIZE = [SCREEN_SIZE[0],350]
+
 # default dimensions
 DIMENSIONS = (20,20)
 
@@ -355,7 +358,7 @@ def main_loop(screen, board, starting_varaibles, clock):
     
         pygame.display.quit()
         pygame.init()
-        Start_screen = pygame.display.set_mode([SCREEN_SIZE[0],300])
+        Start_screen = pygame.display.set_mode(MENU_SIZE)
         pygame.display.set_caption("HighScore Leaderboard") # caption sets title of Window
         Start_screen.fill(black) # (0,0,0) represents RGB for black
         for user in range(len(highscores)):
@@ -681,7 +684,7 @@ class User_Score(object):
         
 def start_menu():
     pygame.init()
-    Start_screen = pygame.display.set_mode([SCREEN_SIZE[0],300])
+    Start_screen = pygame.display.set_mode(MENU_SIZE)
     pygame.display.set_caption("Menu") # caption sets title of Window
     Start_screen.fill(black) # (0,0,0) represents RGB for black
     results = menu(Start_screen) # start = None, load = 2
@@ -728,6 +731,17 @@ def start_menu():
             events = pygame.event.get()
             event_types = [event.type for event in events]
         return 4
+        
+    elif results == 5: # user select to see instructions
+        Start_screen.fill(black)
+        pygame.display.set_caption("Game Instruction")  
+        events = pygame.event.get()
+        event_types = [event.type for event in events]
+        while pygame.MOUSEBUTTONDOWN not in event_types:
+            display_instructions(Start_screen)
+            events = pygame.event.get()
+            event_types = [event.type for event in events]
+        return 4
 
 def start_game():
     # call start menu
@@ -746,13 +760,35 @@ def start_game():
             new_game(highscore_archive = highscore_archive_list, level = level, extension = extension)
             break
 
-def display_high_score(screen, highscore_list):
+def display_instructions(screen):
     location = 1
-    inputask.update_text(screen, "High Scores", location, 24)
+    fontsize = 22
+    Tower_Placement = "How to play: Click anywhere on the map area to add defense towers"
+    Enemy_waves = "How enemies move: they come out in batches randomly from the border of the map"
+    Enemy_kill = "How enemies kill: they only kill when they are next to the tower"   
+    Game_money = "How to earn gold: kill enemies to earn gold and spend gold to build towers"
+    Game_win = "How to win: kill as many enemies as possible to achieve higher score"
+    
+    Enemy_grow = "Watch out! Enemies come out later with more HP and more killing power (also worth more gold!)"
+
+    inputask.update_text(screen, "Instructions" , location,30)
+    inputask.update_text(screen,  Tower_Placement, location+2, fontsize)
+    inputask.update_text(screen,  Enemy_waves, location+4, fontsize)
+    inputask.update_text(screen,  Enemy_kill, location+6, fontsize) 
+    inputask.update_text(screen,  Game_money, location+8, fontsize)
+    inputask.update_text(screen,  Game_win, location+10, fontsize)
+    inputask.update_text(screen,  "Have Fun!!!!! But....", location+12, fontsize)
+    inputask.update_text(screen,  Enemy_grow, location+14, fontsize)
+
+    pass
+
+def display_high_score(screen, highscore_list):
+    location = 2
+    inputask.update_text(screen, "High Scores", location-1, 30)
     for user in highscore_list:
         location +=1
         #message = user[]
-        inputask.update_text(screen, user.name + ": "+ str(user.score) , location,20)  
+        inputask.update_text(screen, "Top " + str(location-2) +" : "+user.name + ",  "+ str(user.score) , location,22)  
         
 def convert_score_list(highscore_archive):
     highscores = []

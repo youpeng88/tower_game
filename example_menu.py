@@ -57,9 +57,10 @@ def main(screen):
    menu = cMenu(50, 50, 20, 5, 'vertical', 100, screen,
                [('Start Game', 1, None),
                 ('Load Game',  2, None),
-                ('Platform',    3, None),
+                ('Platform',   3, None),
                 ('High Scores',4, None),
-                ('Exit',       5, None)])
+                ('Instructions',5, None),
+                ('Exit',       6, None)])
 
    # Center the menu on the draw_surface (the entire screen here)
    menu.set_center(True, True)
@@ -112,6 +113,9 @@ def main(screen):
          elif state == 4:
             print 'High Scores'
             return 4
+         elif state == 5:
+            print 'Instruction'
+            return 5
          else:
             print 'Exit!'
             pygame.quit()
