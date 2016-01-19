@@ -669,12 +669,17 @@ class User_Score(object):
     def __repr__(self):
         return '{}: {}'.format(self.name, self.score)
         
-def start_menu(highscore_archive_list):
+def start_menu():
     pygame.init()
     Start_screen = pygame.display.set_mode([SCREEN_SIZE[0],300])
     pygame.display.set_caption("Menu") # caption sets title of Window
     Start_screen.fill(black) # (0,0,0) represents RGB for black
     results = menu(Start_screen) # start = None, load = 2
+    
+    #load high score
+    f = open('highscores.txt','r')
+    highscore_archive = f.readlines()
+    highscore_archive_list = convert_score_list(highscore_archive)
     
     # load platform option
     g = open('platform.txt','r')
@@ -715,17 +720,16 @@ def start_menu(highscore_archive_list):
         return 4
 
 def start_game():
-    #load high score
-    f = open('highscores.txt','r')
-    highscore_archive = f.readlines()
-    highscore_archive_list = convert_score_list(highscore_archive)
-
     # call start menu
-    level = start_menu(highscore_archive_list)
+    level = start_menu()
     while level != None:
         if level == 4:
-            level = start_menu(highscore_archive_list)
+            level = start_menu()
         else: 
+            #load high score
+            f = open('highscores.txt','r')
+            highscore_archive = f.readlines()
+            highscore_archive_list = convert_score_list(highscore_archive)
             # load platform option
             g = open('platform.txt','r')
             extension = g.readlines()

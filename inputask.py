@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 """
 Created on Tue Jan 19 10:42:07 2016
-
-"""
 # Adapted by You Peng from 
 # Timothy Downs, inputbox written for my map editor
+# new function added by You Peng:
+# display and update_text
+
+"""
+
 
 # This program needs a little cleaning up
 # It ignores the shift key
@@ -33,16 +36,16 @@ def display_box(screen, message):
   "Print a message in a box in the middle of the screen"
   fontobject = pygame.font.Font(None,20)
   pygame.draw.rect(screen, (0,0,0),
-                   ((screen.get_width() / 2) - 120,
+                   ((screen.get_width() / 2) - 170,
                     (screen.get_height() / 2) - 10,
-                    200,20), 0)
+                    300,20), 0)
   pygame.draw.rect(screen, (255,255,255),
-                   ((screen.get_width() / 2) - 122,
+                   ((screen.get_width() / 2) - 172,
                     (screen.get_height() / 2) - 12,
-                    204,24), 1)
+                    304,24), 1)
   if len(message) != 0:
     screen.blit(fontobject.render(message, 1, (255,255,255)),
-                ((screen.get_width() / 2) - 120, (screen.get_height() / 2) - 10))
+                ((screen.get_width() / 2) - 170, (screen.get_height() / 2) - 10))
   pygame.display.flip()
   
 def display(screen, message):
