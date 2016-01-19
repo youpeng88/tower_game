@@ -11,6 +11,7 @@ Thoughts for additional changes:
     2. merge related varaible in to one value corresponding to the variable key
 '''
 
+import os
 import pygame
 import random
 import math
@@ -18,8 +19,9 @@ import inputask
 from example_menu import main as menu
 from difficulty_menu import main as level_menu
 from platform_menu import main as pl_menu
+
 # from dashedline import draw_dashed_line as draw_dash
-from dashedline2 import draw_dashed_line as draw_dash2
+# from dashedline2 import draw_dashed_line as draw_dash2
 
 ### Global Variables
 
@@ -139,7 +141,8 @@ def sidebar(screen, tower_number, money, wavecount, level, score):
     update_text(screen, "Wave #: " + str(wavecount), 3, "enemy_icon") 
     update_text(screen, "Score #: " + str(score), 4, "score")
     if level == 1:
-        update_text(screen, "Difficulty Level: Easy", 5, "level") 
+        if os.path.isfile('saved_state.txt'):
+            update_text(screen, "Difficulty Level: Easy", 5, "level")
     elif level == 2:
         update_text(screen, "Difficulty Level: Medium", 5, "level") 
     else:
@@ -159,7 +162,8 @@ def new_game(saved_stats = None, highscore_archive = None, level = 1, extension 
     # load the image dictionary
     global IMAGE_DICT
     IMAGE_DICT = image_dictionary(extension)
-
+    money_v = [5000, 4000, 2500]
+    
     if saved_stats != None:
         tower_number = int(saved_stats[0])
         money = int(saved_stats[1])
@@ -188,11 +192,11 @@ def new_game(saved_stats = None, highscore_archive = None, level = 1, extension 
         username = "guest"
         if level!= 1:
             difficulty = level
-    
+        money = money_v[level-1]
+        
     highscores = highscore_archive;
 
-    # other starting variables, modified by the setting chosen in the opening menu
-    money = [5000, 4000, 2500]
+    # other starting variables, modified by the setting chosen in the opening menu    
     HP_enemy = [100, 150, 200]
     HP_tower = [500, 500, 600]
     HP_base = [1000, 1200, 1200]
@@ -210,7 +214,7 @@ def new_game(saved_stats = None, highscore_archive = None, level = 1, extension 
                           HP_tower[difficulty-1],
                           speed_level[difficulty-1],
                           tower_number,
-                          wavecount, money[difficulty-1],
+                          wavecount,money,
                           defense_range[difficulty-1],
                           tower_cost[difficulty-1],
                           attack_power_tower[difficulty-1],
@@ -269,6 +273,8 @@ def main_loop(screen, board, starting_varaibles, clock):
     event_types = [event.type for event in events]
     gameover = False
     mainloop = True
+    loop_number = 0
+    loop_created = 0
     
     while mainloop == True:
         while pygame.QUIT not in event_types and gameover is not True: # when use didn't click exit on the window    
@@ -292,7 +298,7 @@ def main_loop(screen, board, starting_varaibles, clock):
              time_period = 1000
              elapsed_time = pygame.time.get_ticks() - time_created
     
-             if elapsed_time > time_period:
+             if loop_number - loop_created > 10:
                  enemies_count = 0
                  while enemies_count < num_enemies:
                      index = random.randint(0,num_border_locs-1)
@@ -300,6 +306,7 @@ def main_loop(screen, board, starting_varaibles, clock):
                      time = pygame.time.get_ticks()
                      board.add_enemy_to_board(time, (x,y),speed_level, HP_enemy, attack_power_enemy,money_earned_per_enemy)
                      enemies_count +=1
+                 loop_created = loop_number
                  time_created = pygame.time.get_ticks()
                  wavecount +=1
             # Increase enemy HP by 10 and amount of money earned by 5 every 10 waves 
@@ -325,6 +332,7 @@ def main_loop(screen, board, starting_varaibles, clock):
                          gameover = True
                          print "Your Tower is Destroyed!"
                          print "Your Score is ", score
+                         break
                  else:
                     enemy.point_at_base(board)
                  enemy.update()
@@ -342,6 +350,8 @@ def main_loop(screen, board, starting_varaibles, clock):
         
              events = pygame.event.get()
              event_types = [event.type for event in events] # update event list
+
+             loop_number += 1
     
         pygame.display.quit()
         pygame.init()
@@ -474,11 +484,11 @@ class Board:
 
     def draw_laser_line(self, enemy_position, tower_position):
         # draws normal solid line
-#        pygame.draw.line(self.screen, black, tower_position, enemy_position, 2)
+        pygame.draw.line(self.screen, black, tower_position, enemy_position, 2)
         
         # if we want to draw dashed line
         #draw_dash(self.screen, black, tower_position, enemy_position, dash_length = 5)
-        draw_dash2(self.screen, red, tower_position, enemy_position, width = 2, dash_length = 5)
+        # draw_dash2(self.screen, red, tower_position, enemy_position, width = 2, dash_length = 5)
        
 class Game_obj(pygame.sprite.Sprite):
     def __init__(self, board, time, position, obj_type, init_HP, attack_power):
