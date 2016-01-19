@@ -4,6 +4,7 @@
     10:04pm: fixed the draw line problem, now you can see the tower laser shooting line in green. 
     10:32am (monday): added icons to the side bar and moved life bar above with some space (Alex's changes is merged)
     10:40 am (monday): added Alex's recent change with rotation
+    1-19-16: Alex's change merged
 
 #Latest Change by Zach:
     12:41 AM: Modified Enemies.point_at_base function such that all enemies now target base
@@ -15,4 +16,5 @@
     1-19-16 00:10am: Modified the save and load functionality to keep the defense_towers from the previous game upon load game.
     1-19-16 02:26am: Added a highscore archive to keep track of and display highscores. This involved: creating a highscore class, saving the score, adding user input for name, calling the scores at the beginning. Also changed to grass background.
 
-
+# Latest Version: 
+    1-19-16: Alex's recnet change merged (grass backgorund, userinput name and high score)
