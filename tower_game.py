@@ -199,6 +199,7 @@ def new_game(screen,saved_stats = None, highscore_archive = None):
     attack_power_tower = 2
     attack_power_enemy = 5
     tower_cost = 500
+    money_earned_per_enemy = 50
     
     defense_range_base = 15
     attack_power_base = 5
@@ -215,7 +216,8 @@ def new_game(screen,saved_stats = None, highscore_archive = None):
                           tower_list, score,
                           difficulty,
                           highscores,
-                          username]
+                          username,
+                          money_earned_per_enemy]
 
     board = Board(HP_base,screen,defense_range_base, attack_power_base)
 
@@ -239,6 +241,7 @@ def main_loop(screen, board, starting_varaibles, clock):
     difficulty = starting_varaibles[12]
     highscores = starting_varaibles[13]
     username = starting_varaibles[14]
+    money_earned_per_enemy = starting_varaibles[15]
 
     time_created = 0
 
@@ -282,7 +285,7 @@ def main_loop(screen, board, starting_varaibles, clock):
 
          #Updated Action 2 and 5 (move)
          num_border_locs = len(border)
-         num_enemies = 2
+         num_enemies = 1
          time_period = 1000
          elapsed_time = pygame.time.get_ticks() - time_created
 
@@ -292,10 +295,16 @@ def main_loop(screen, board, starting_varaibles, clock):
                  index = random.randint(0,num_border_locs-1)
                  x,y = border[index]
                  time = pygame.time.get_ticks()
-                 board.add_enemy_to_board(time, (x,y),speed_level, HP_enemy, attack_power_enemy)
+                 board.add_enemy_to_board(time, (x,y),speed_level, HP_enemy, attack_power_enemy,money_earned_per_enemy)
                  enemies_count +=1
              time_created = pygame.time.get_ticks()
              wavecount +=1
+
+            # Increase enemy HP by 10 and amount of money earned by 5 every 10 waves 
+             if wavecount % 10 == 0:
+                 HP_enemy += 10
+                 money_earned_per_enemy += 5
+            
         ###Test
          #
          # # action 2: add enemies per wave frequecy
@@ -458,8 +467,8 @@ class Board:
                 self.lifebars.add(defense_tower_lifebar)
                 return True
 
-    def add_enemy_to_board(self, time, position, speed_level, HP_enemy, attack_power):
-        enemy = Enemies(self, time, position, "enemy", HP_enemy, speed_level, attack_power)
+    def add_enemy_to_board(self, time, position, speed_level, HP_enemy, attack_power, money_earned_per_enemy):
+        enemy = Enemies(self, time, position, "enemy", HP_enemy, speed_level, attack_power, money_earned_per_enemy)
         collision_tower = pygame.sprite.spritecollideany(enemy, self.towers, None)
         collision_enemy = pygame.sprite.spritecollideany(enemy, self.enemies, None)
         if collision_tower is None and collision_enemy is None:
@@ -549,8 +558,7 @@ class Tower(Game_obj):
             self.board.draw_laser_line(enemy_position, self.position)
             attack_enemy.HP -= self.attack_power                 
             if attack_enemy.HP <= 0:
-                attack_enemy.enemy_death(self.board)
-                money = 50
+                money = attack_enemy.enemy_death(self.board)
         return money
 
     def tower_death(self, board):
@@ -586,7 +594,7 @@ class Defense_tower(Tower):
 
 
 class Enemies(Game_obj):
-    def __init__(self, board, time, position, obj_type, init_HP, level, attack_power):
+    def __init__(self, board, time, position, obj_type, init_HP, level, attack_power, money_earned_per_enemy):
         super(Enemies,self).__init__(board, time, position, obj_type, init_HP, attack_power)
         self.position = position
         self.orientation = (0.0, 1.0) #points up initially
@@ -594,6 +602,7 @@ class Enemies(Game_obj):
         self.dx = 0
         self.dy = 0
         self.point_at_base(board)
+        self.money_earned_per_enemy = money_earned_per_enemy
 
     def point_at_base(self, board): # moving direction
 #        direction = (board.base_tower.position[0] - self.position[0], board.base_tower.position[1] - self.position[1])
@@ -644,6 +653,7 @@ class Enemies(Game_obj):
         self.kill()
         self.update()
         lifebar.update()
+        return self.money_earned_per_enemy
         
     def touching_defense_or_base_tower(self, board):
         collision = pygame.sprite.spritecollideany(self, board.towers, collided=None)
