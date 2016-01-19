@@ -16,7 +16,7 @@ import random
 import math
 from example_menu import main as menu
 # from dashedline import draw_dashed_line as draw_dash
-from dashedline2 import draw_dashed_line as draw_dash2
+##from dashedline2 import draw_dashed_line as draw_dash2
 
 ### Global Variables
 
@@ -44,26 +44,26 @@ BAR_SIZE = (MAP_SIZE[0],SCREEN_SIZE[1]-3*MARGIN-MAP_SIZE[0])
 DIMENSIONS = (20,20)
 
 #PC Dictionary relating object type to the image files it uses and its dimensions
-#IMAGE_DICT = {}
-#IMAGE_DICT["base_tower"] = ("transparent_base_tower.png", (20, 40))
-#IMAGE_DICT["defense_tower"] = ("transparent_defense_tower.png", (20, 20))
-#IMAGE_DICT["enemy"] = ("transparent_enemy.png", (20, 20))
-#IMAGE_DICT["background"] = ("grass_background.png", MAP_SIZE)
-#IMAGE_DICT["gold_icon"] = ("gold_coins.png", (15,15))
-#IMAGE_DICT["tower_icon"] = ("defense_tower_icon.png", (15,15))
-#IMAGE_DICT["enemy_icon"] = ("enemy_icon.png", (15,15))
-#IMAGE_DICT["level"] = ("level.png", (15,15))
-#
-#MAC Dictionary relating object type to the image files it uses and its dimensions
 IMAGE_DICT = {}
-IMAGE_DICT["base_tower"] = ("base_tower.bmp", (20, 40))
-IMAGE_DICT["defense_tower"] = ("defense_tower.bmp", (20, 20))
-IMAGE_DICT["enemy"] = ("enemy.bmp", (20, 20))
-IMAGE_DICT["background"] = ("grass_background.bmp", MAP_SIZE)
-IMAGE_DICT["gold_icon"] = ("gold_coins.bmp", (15,15))
-IMAGE_DICT["tower_icon"] = ("defense_tower_icon.bmp", (15,15))
-IMAGE_DICT["enemy_icon"] = ("enemy_icon.bmp", (15,15))
-IMAGE_DICT["level"] = ("level.bmp", (15,15))
+IMAGE_DICT["base_tower"] = ("transparent_base_tower.png", (20, 40))
+IMAGE_DICT["defense_tower"] = ("transparent_defense_tower.png", (20, 20))
+IMAGE_DICT["enemy"] = ("transparent_enemy.png", (20, 20))
+IMAGE_DICT["background"] = ("grass_background.png", MAP_SIZE)
+IMAGE_DICT["gold_icon"] = ("gold_coins.png", (15,15))
+IMAGE_DICT["tower_icon"] = ("defense_tower_icon.png", (15,15))
+IMAGE_DICT["enemy_icon"] = ("enemy_icon.png", (15,15))
+IMAGE_DICT["level"] = ("level.png", (15,15))
+
+#MAC Dictionary relating object type to the image files it uses and its dimensions
+##IMAGE_DICT = {}
+##IMAGE_DICT["base_tower"] = ("base_tower.bmp", (20, 40))
+##IMAGE_DICT["defense_tower"] = ("defense_tower.bmp", (20, 20))
+##IMAGE_DICT["enemy"] = ("enemy.bmp", (20, 20))
+##IMAGE_DICT["background"] = ("grass_background.bmp", MAP_SIZE)
+##IMAGE_DICT["gold_icon"] = ("gold_coins.bmp", (15,15))
+##IMAGE_DICT["tower_icon"] = ("defense_tower_icon.bmp", (15,15))
+##IMAGE_DICT["enemy_icon"] = ("enemy_icon.bmp", (15,15))
+##IMAGE_DICT["level"] = ("level.bmp", (15,15))
 
 # define screen
 pygame.init()
@@ -473,11 +473,11 @@ class Board:
 
     def draw_laser_line(self, enemy_position, tower_position):
         # draws normal solid line
-        # pygame.draw.line(self.screen, black, tower_position, enemy_position, 2)
+        pygame.draw.line(self.screen, black, tower_position, enemy_position, 2)
         
         # if we want to draw dashed line
         #draw_dash(self.screen, black, tower_position, enemy_position, dash_length = 5)
-        draw_dash2(self.screen, green, tower_position, enemy_position, width = 2, dash_length = 5)
+##        draw_dash2(self.screen, green, tower_position, enemy_position, width = 2, dash_length = 5)
         
 class Game_obj(pygame.sprite.Sprite):
     def __init__(self, board, time, position, obj_type, init_HP, attack_power):
@@ -510,23 +510,32 @@ class Lifebar(pygame.sprite.Sprite):
         self.board = board
         self.set_pic()
         pygame.draw.rect(self.screen, (0,255,0), (self.position,self.dimensions))
-        self.oldHP = 0
         self.full_HP = full_HP
+        self.update_Lifebar_text()
 
     def set_pic(self):
         self.image = pygame.Surface(self.dimensions)
         self.image.set_colorkey((0,0,0)) # black transparent
-#        self.rect = self.image.get_rect()
-#        self.rect.topleft = self.position       
+
+    def update_Lifebar_text(self):
+        textSize = 10
+        font = pygame.font.Font(None, 20)
+        textx = 0 + textSize
+        text = font.render(str(self.boss.HP) + "/" + str(self.full_HP), True, white)
+        textRect = text.get_rect()
+        textRect.y = self.position[1] - 15
+        textRect.centerx = self.boss.rect.center[0]
+        screen.blit(text, textRect)
    
     def update(self):
-            self.position = (self.boss.rect.center[0] - self.boss.dimensions[0]/2, self.boss.rect.center[1] - 7 - self.boss.dimensions[1]/2)
-            
-            self.frac = float(self.boss.HP) / float(self.full_HP)
-            pygame.draw.rect(self.screen, (0,0,0), (self.position,self.dimensions)) # fill black
-            pygame.draw.rect(self.screen, (0,255,0), (self.position,(int(self.boss.dimensions[0] * self.frac),self.dimensions[1])),0) # fill green
-            self.oldHP = self.boss.HP
 
+        self.position = (self.boss.rect.center[0] - self.boss.dimensions[0]/2, self.boss.rect.center[1] - 7 - self.boss.dimensions[1]/2)
+        self.frac = float(self.boss.HP) / float(self.full_HP)
+        pygame.draw.rect(self.screen, (0,0,0), (self.position,self.dimensions)) # fill black
+        pygame.draw.rect(self.screen, (0,255,0), (self.position,(int(self.boss.dimensions[0] * self.frac),self.dimensions[1])),0) # fill green
+
+        self.update_Lifebar_text()
+            
 class Tower(Game_obj):
     def __init__(self, board, time, position, obj_type, init_HP, defense_range, attack_power):
         super(Tower, self).__init__(board, time, position, obj_type, init_HP, attack_power)
