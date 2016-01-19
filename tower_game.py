@@ -16,7 +16,7 @@ import random
 import math
 from example_menu import main as menu
 # from dashedline import draw_dashed_line as draw_dash
-# from dashedline2 import draw_dashed_line as draw_dash2
+from dashedline2 import draw_dashed_line as draw_dash2
 
 ### Global Variables
 
@@ -38,32 +38,32 @@ MARGIN = 10
 SCREEN_SIZE = (MAP_SIZE[1]+2*MARGIN,680)  # (width in pixels, height in pixels)
 
 # bar_size
-BAR_SIZE = (MAP_SIZE[0],SCREEN_SIZE[1]-3*MARGIN-MAP_SIZE[0],)
+BAR_SIZE = (MAP_SIZE[0],SCREEN_SIZE[1]-3*MARGIN-MAP_SIZE[0])
 
 # default dimensions
 DIMENSIONS = (20,20)
 
 #PC Dictionary relating object type to the image files it uses and its dimensions
-IMAGE_DICT = {}
-IMAGE_DICT["base_tower"] = ("transparent_base_tower.png", (20, 40))
-IMAGE_DICT["defense_tower"] = ("transparent_defense_tower.png", (20, 20))
-IMAGE_DICT["enemy"] = ("transparent_enemy.png", (20, 20))
-IMAGE_DICT["background"] = ("brick_wall.png", MAP_SIZE)
-IMAGE_DICT["gold_icon"] = ("gold_coins.png", (15,15))
-IMAGE_DICT["tower_icon"] = ("defense_tower_icon.png", (15,15))
-IMAGE_DICT["enemy_icon"] = ("enemy_icon.png", (15,15))
-IMAGE_DICT["level"] = ("level.png", (15,15))
+#IMAGE_DICT = {}
+#IMAGE_DICT["base_tower"] = ("transparent_base_tower.png", (20, 40))
+#IMAGE_DICT["defense_tower"] = ("transparent_defense_tower.png", (20, 20))
+#IMAGE_DICT["enemy"] = ("transparent_enemy.png", (20, 20))
+#IMAGE_DICT["background"] = ("brick_wall.png", MAP_SIZE)
+#IMAGE_DICT["gold_icon"] = ("gold_coins.png", (15,15))
+#IMAGE_DICT["tower_icon"] = ("defense_tower_icon.png", (15,15))
+#IMAGE_DICT["enemy_icon"] = ("enemy_icon.png", (15,15))
+#IMAGE_DICT["level"] = ("level.png", (15,15))
 #
  # MAC Dictionary relating object type to the image files it uses and its dimensions
-# IMAGE_DICT = {}
-# IMAGE_DICT["base_tower"] = ("base_tower.bmp", (20, 40))
-# IMAGE_DICT["defense_tower"] = ("defense_tower.bmp", (20, 20))
-# IMAGE_DICT["enemy"] = ("enemy.bmp", (20, 20))
-# IMAGE_DICT["background"] = ("brick_wall.bmp", MAP_SIZE)
-# IMAGE_DICT["gold_icon"] = ("gold_coins.bmp", (15,15))
-# IMAGE_DICT["tower_icon"] = ("defense_tower_icon.bmp", (15,15))
-# IMAGE_DICT["enemy_icon"] = ("enemy_icon.bmp", (15,15))
-# IMAGE_DICT["level"] = ("level.bmp", (15,15))
+IMAGE_DICT = {}
+IMAGE_DICT["base_tower"] = ("base_tower.bmp", (20, 40))
+IMAGE_DICT["defense_tower"] = ("defense_tower.bmp", (20, 20))
+IMAGE_DICT["enemy"] = ("enemy.bmp", (20, 20))
+IMAGE_DICT["background"] = ("brick_wall.bmp", MAP_SIZE)
+IMAGE_DICT["gold_icon"] = ("gold_coins.bmp", (15,15))
+IMAGE_DICT["tower_icon"] = ("defense_tower_icon.bmp", (15,15))
+IMAGE_DICT["enemy_icon"] = ("enemy_icon.bmp", (15,15))
+IMAGE_DICT["level"] = ("level.bmp", (15,15))
 
 # define screen
 pygame.init()
@@ -364,11 +364,11 @@ class Board:
 
     def draw_laser_line(self, enemy_position, tower_position):
         # draws normal solid line
-         pygame.draw.line(self.screen, black, tower_position, enemy_position, 2)
+        # pygame.draw.line(self.screen, black, tower_position, enemy_position, 2)
         
         # if we want to draw dashed line
         #draw_dash(self.screen, black, tower_position, enemy_position, dash_length = 5)
-        #draw_dash2(self.screen, green, tower_position, enemy_position, width = 2, dash_length = 5)
+        draw_dash2(self.screen, green, tower_position, enemy_position, width = 2, dash_length = 5)
         
 class Game_obj(pygame.sprite.Sprite):
     def __init__(self, board, time, position, obj_type, init_HP, attack_power):
