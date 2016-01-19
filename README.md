@@ -9,7 +9,8 @@
     1-19-16 (12:16pm): Zach's recent changes merged (life bar with number)
     1-19-16(1:06pm): added level of difficulty menu after you select start game and can go back to main menu after that if you select back  
     1-19-16(2:31pm): added sidebar icon for score, addeed highscore display on main menu (click to go back to main menu)
-     1-19-16(2:47pm): Zach's recent changes merged (stronger enemy and gives more money)
+    1-19-16(2:47pm): Zach's recent changes merged (stronger enemy and gives more money)
+    1-19-16(3:20pm): added PC and MAC choices at the start menu (remembers previous selection if don't change platform choice)
 
 #Latest Change by Zach:
     12:41 AM: Modified Enemies.point_at_base function such that all enemies now target base
@@ -30,3 +31,4 @@
     1-19-16(1:06pm): Yoyo's recent changes merged (difficulty level menu and parameters, display on side bar)
     1-19-16(2:31pm): Yoyo's recent changes merged (added sidebar icon for score, addeed highscore display on main menu (click to go back to main menu))
     1-19-16(2:47pm): Zach's recent changes merged (stronger enemy and gives more money)
+    1-19-16(3:20pm): Yoyo's recent changes merged (added PC and MAC choices at the start menu (remembers previous selection if don't change platform choice)
