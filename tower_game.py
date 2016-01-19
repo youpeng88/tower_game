@@ -16,6 +16,7 @@ import random
 import math
 import inputask
 from example_menu import main as menu
+from difficulty_menu import main as level_menu
 # from dashedline import draw_dashed_line as draw_dash
 from dashedline2 import draw_dashed_line as draw_dash2
 
@@ -124,14 +125,19 @@ def update_text(screen, message, location,obj_type):
     icon = Background(obj_type, [textRect.x - 20, textRect.y])
     screen.blit(icon.image, icon.rect)
 
-def sidebar(screen, tower_number, money, wavecount):
+def sidebar(screen, tower_number, money, wavecount, level):
     screen.fill(black)
     update_text(screen, "Tower #: " + str(tower_number), 1, "tower_icon")
     update_text(screen, "Money: " + str(money), 2, "gold_icon")
     update_text(screen, "Wave #: " + str(wavecount), 3, "enemy_icon") 
-    update_text(screen, "Difficulty Level: Easy", 4, "level") 
+    if level == 1:
+        update_text(screen, "Difficulty Level: Easy", 4, "level") 
+    elif level == 2:
+        update_text(screen, "Difficulty Level: Medium", 4, "level") 
+    else:
+        update_text(screen, "Difficulty Level: Hard", 4, "level") 
         
-def new_game(saved_stats = None, highscore_archive = None):
+def new_game(saved_stats = None, highscore_archive = None, level = 1):
     """
     Sets up all necessary components to start a new game
     of power tower.
@@ -162,12 +168,13 @@ def new_game(saved_stats = None, highscore_archive = None):
                                     tower_list.append([time, (x,y)])
     else:
         tower_number = 1
-        money = 5000
         wavecount = 0
         tower_list = None
-        score = 0
         difficulty = 1
+        score = 0
         username = "guest"
+        if level!= 1:
+            difficulty = level
 
     highscores = []
     if highscore_archive != []:
@@ -192,33 +199,35 @@ def new_game(saved_stats = None, highscore_archive = None):
                       User_Score("--empty--", 0)]
 
     # other starting variables, modified by the setting chosen in the opening menu
-    HP_enemy = 100
-    HP_tower = 500
-    HP_base = 1000
-    speed_level = 5
-    defense_range = 200
-    attack_power_tower = 2
-    attack_power_enemy = 5
-    tower_cost = 500
+    money = [5000, 4000, 2500]
+    HP_enemy = [100, 150, 200]
+    HP_tower = [500, 500, 600]
+    HP_base = [1000, 1200, 1200]
+    speed_level = [2,4,6]
+    defense_range = [200, 150, 100]
+    attack_power_tower = [2,3,4]
+    attack_power_enemy = [5,5,5]
+    tower_cost = [500,500,500]
     
-    defense_range_base = 15
-    attack_power_base = 5
+    defense_range_base = [15,20,25]
+    attack_power_base = [5,8,10]
+    
 
-    starting_varaibles = [HP_enemy,
-                          HP_tower,
-                          speed_level,
+    starting_varaibles = [HP_enemy[difficulty-1],
+                          HP_tower[difficulty-1],
+                          speed_level[difficulty-1],
                           tower_number,
-                          wavecount, money,
-                          defense_range,
-                          tower_cost,
-                          attack_power_tower,
-                          attack_power_enemy,
+                          wavecount, money[difficulty-1],
+                          defense_range[difficulty-1],
+                          tower_cost[difficulty-1],
+                          attack_power_tower[difficulty-1],
+                          attack_power_enemy[difficulty-1],
                           tower_list, score,
                           difficulty,
                           highscores,
                           username]
-
-    board = Board(HP_base,screen,defense_range_base, attack_power_base)
+    print starting_varaibles
+    board = Board(HP_base[difficulty-1],screen,defense_range_base[difficulty-1], attack_power_base[difficulty-1])
 
     clock = pygame.time.Clock()
 
@@ -325,7 +334,7 @@ def main_loop(screen, board, starting_varaibles, clock):
     #         board.enemies.update()
     
             # call sidebar        
-             sidebar(screen, tower_number, money, wavecount)
+             sidebar(screen, tower_number, money, wavecount,difficulty)
     #        screen.fill(black) # (0,0,0) represents RGB for black
              screen.blit(BackGround.image, BackGround.rect)
              board.towers.draw(screen)
@@ -343,7 +352,7 @@ def main_loop(screen, board, starting_varaibles, clock):
         pygame.display.quit()
         pygame.init()
         Start_screen = pygame.display.set_mode([MAP_SIZE[0],300])
-        pygame.display.set_caption("HighScore") # caption sets title of Window
+        pygame.display.set_caption("HighScore Leaderboard") # caption sets title of Window
         Start_screen.fill(black) # (0,0,0) represents RGB for black
         for user in range(len(highscores)):
             if score > highscores[user].score:
@@ -373,13 +382,14 @@ def main_loop(screen, board, starting_varaibles, clock):
             break
 
         # display high scores
-        Start_screen.fill(black)        
+        Start_screen.fill(black)
+        pygame.display.set_caption("HighScore Leaderboard")        
         location = 1
         inputask.update_text(Start_screen, "High Scores", location)
         for user in highscores:
             location +=1
             inputask.update_text(Start_screen, user.name + ": "+ str(user.score), location)
-        pygame.time.wait(5000)  
+        pygame.time.wait(4000)  
         pygame.display.quit()
         mainloop = False
         
@@ -399,34 +409,8 @@ def main_loop(screen, board, starting_varaibles, clock):
             for user in range(len(highscores)):
                 f.write(str(highscores[user].name)+"+"+str(highscores[user].score) + "\n")
             f.close()
-            
-#        for user in range(len(highscores)):
-#            if score > highscores[user].score:
-#                print "You Made It To The Top 10 Highscores!"
-#                while True:     # Only allows for integer input, refuses any others
-#                    try:
-#                        username = str(raw_input("Please Enter Your Name: "))
-#                        break
-#                    except ValueError:
-#                        print "Please enter a string"
-#                highscores.insert(user, User_Score(username, score))
-#                break
-#        highscores = highscores[0:10]
-    
-#        if highscores == []:
-#            while True:     # Only allows for integer input, refuses any others
-#                try:
-#                    username = str(raw_input("Please Enter Your Name: "))
-#                    break
-#                except ValueError:
-#                    print "Please enter a string"
-#            highscores.insert(0, User_Score(username, score))
-            
-#        print "High Scores: "
-#        for user in highscores:
-#            print user
-            
-    start_menu()
+
+    start_game()
     
 class Background(pygame.sprite.Sprite):
     def __init__(self, obj_type, position):
@@ -695,21 +679,34 @@ class User_Score(object):
     def __repr__(self):
         return '{}: {}'.format(self.name, self.score)
         
-def start_menu():
+def start_menu(highscore_archive):
     pygame.init()
     Start_screen = pygame.display.set_mode([MAP_SIZE[0],300])
     pygame.display.set_caption("Menu") # caption sets title of Window
     Start_screen.fill(black) # (0,0,0) represents RGB for black
     results = menu(Start_screen) # start = None, load = 2
-    # load high score
-    f = open('highscores.txt','r')
-    highscore_archive = f.readlines()
+
     if results is None: # This means user selected start game
-        my_game = new_game(highscore_archive = highscore_archive)
+        Start_screen.fill(black)
+        level = level_menu(Start_screen)
+        return level      
     elif results == 2: # user selected LOAD game
         with open('saved_state.txt','r') as f:
             saved_state = f.readlines() # need to pass this into the game to update the state
-        my_game = new_game(saved_state,highscore_archive)
+        new_game(saved_state,highscore_archive)
+        return None
     # use options to specify difficulty level 
 
-start_menu()
+def start_game():
+    #load high score
+    f = open('highscores.txt','r')
+    highscore_archive = f.readlines()
+    level = start_menu(highscore_archive)
+    while level != None:
+        if level == 4:
+            level = start_menu(highscore_archive)
+        else: 
+            new_game(highscore_archive = highscore_archive, level = level)
+            break
+
+start_game()
