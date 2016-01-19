@@ -53,13 +53,13 @@ def display(screen, message):
                 ((screen.get_width() / 2) - 120, (screen.get_height() / 2) - 10))
   pygame.display.flip()
   
-def update_text(screen, message, location):
+def update_text(screen, message, location, fontsize):
     """
     Used to display the text on the right-hand part of the screen.
     location will be used to decide what variable to display: tower number, money, wave
     """
     textSize = 20
-    font = pygame.font.Font(None, 20)
+    font = pygame.font.Font(None, fontsize)
     texty = 0 + textSize
     text = font.render(message, True, (255,255,255), (0,0,0))
     textRect = text.get_rect()

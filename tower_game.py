@@ -175,28 +175,29 @@ def new_game(saved_stats = None, highscore_archive = None, level = 1):
         username = "guest"
         if level!= 1:
             difficulty = level
-
-    highscores = []
-    if highscore_archive != []:
-
-         for i in range(len(highscore_archive)):
-             for j in range(len(highscore_archive[i])):
-                 if highscore_archive[i][j] == "+":
-                    archive_name = highscore_archive[i][0:j]
-                    archive_score = int(highscore_archive[i][j+1:len(highscore_archive[i])-1])
-                    highscores.append(User_Score(archive_name, archive_score))
-                    highscores = sorted(highscores, key=getKey, reverse=True)
-    else:
-        highscores = [User_Score("--empty--", 0),
-                      User_Score("--empty--", 0),
-                      User_Score("--empty--", 0),
-                      User_Score("--empty--", 0),
-                      User_Score("--empty--", 0),
-                      User_Score("--empty--", 0),
-                      User_Score("--empty--", 0),
-                      User_Score("--empty--", 0),
-                      User_Score("--empty--", 0),
-                      User_Score("--empty--", 0)]
+    
+    highscores = highscore_archive;
+#    highscores = []
+#    if highscore_archive != []:
+#
+#         for i in range(len(highscore_archive)):
+#             for j in range(len(highscore_archive[i])):
+#                 if highscore_archive[i][j] == "+":
+#                    archive_name = highscore_archive[i][0:j]
+#                    archive_score = int(highscore_archive[i][j+1:len(highscore_archive[i])-1])
+#                    highscores.append(User_Score(archive_name, archive_score))
+#                    highscores = sorted(highscores, key=getKey, reverse=True)
+#    else:
+#        highscores = [User_Score("--empty--", 0),
+#                      User_Score("--empty--", 0),
+#                      User_Score("--empty--", 0),
+#                      User_Score("--empty--", 0),
+#                      User_Score("--empty--", 0),
+#                      User_Score("--empty--", 0),
+#                      User_Score("--empty--", 0),
+#                      User_Score("--empty--", 0),
+#                      User_Score("--empty--", 0),
+#                      User_Score("--empty--", 0)]
 
     # other starting variables, modified by the setting chosen in the opening menu
     money = [5000, 4000, 2500]
@@ -226,7 +227,6 @@ def new_game(saved_stats = None, highscore_archive = None, level = 1):
                           difficulty,
                           highscores,
                           username]
-    print starting_varaibles
     board = Board(HP_base[difficulty-1],screen,defense_range_base[difficulty-1], attack_power_base[difficulty-1])
 
     clock = pygame.time.Clock()
@@ -367,6 +367,15 @@ def main_loop(screen, board, starting_varaibles, clock):
                     except ValueError:
                         inputask.display_box(Start_screen, "Please enter a string")
                 highscores.insert(user, User_Score(username, score))
+                Start_screen.fill(black)
+                pygame.display.set_caption("HighScore Leaderboard")  
+                display_high_score(Start_screen, highscores)
+#                location = 1
+#                inputask.update_text(Start_screen, "High Scores", location, 24)
+#                for user in highscores:
+#                    location +=1
+#                    inputask.update_text(Start_screen, user.name + ": "+ str(user.score), location, 20)
+                pygame.time.wait(4000) 
                 break
             
         highscores = highscores[0:10]
@@ -382,14 +391,14 @@ def main_loop(screen, board, starting_varaibles, clock):
             break
 
         # display high scores
-        Start_screen.fill(black)
-        pygame.display.set_caption("HighScore Leaderboard")        
-        location = 1
-        inputask.update_text(Start_screen, "High Scores", location)
-        for user in highscores:
-            location +=1
-            inputask.update_text(Start_screen, user.name + ": "+ str(user.score), location)
-        pygame.time.wait(4000)  
+#        Start_screen.fill(black)
+#        pygame.display.set_caption("HighScore Leaderboard")        
+#        location = 1
+#        inputask.update_text(Start_screen, "High Scores", location)
+#        for user in highscores:
+#            location +=1
+#            inputask.update_text(Start_screen, user.name + ": "+ str(user.score), location)
+#        pygame.time.wait(4000)  
         pygame.display.quit()
         mainloop = False
         
@@ -531,11 +540,11 @@ class Lifebar(pygame.sprite.Sprite):
 
     def update_Lifebar_text(self):
         textSize = 10
-        font = pygame.font.Font(None, 20)
+        font = pygame.font.Font(None, 12)
         textx = 0 + textSize
         text = font.render(str(self.boss.HP) + "/" + str(self.full_HP), True, white)
         textRect = text.get_rect()
-        textRect.y = self.position[1] - 15
+        textRect.y = self.position[1] - 8
         textRect.centerx = self.boss.rect.center[0]
         self.screen.blit(text, textRect)
    
@@ -679,7 +688,7 @@ class User_Score(object):
     def __repr__(self):
         return '{}: {}'.format(self.name, self.score)
         
-def start_menu(highscore_archive):
+def start_menu(highscore_archive_list):
     pygame.init()
     Start_screen = pygame.display.set_mode([MAP_SIZE[0],300])
     pygame.display.set_caption("Menu") # caption sets title of Window
@@ -693,20 +702,63 @@ def start_menu(highscore_archive):
     elif results == 2: # user selected LOAD game
         with open('saved_state.txt','r') as f:
             saved_state = f.readlines() # need to pass this into the game to update the state
-        new_game(saved_state,highscore_archive)
+        new_game(saved_state,highscore_archive_list)
         return None
-    # use options to specify difficulty level 
+    # use options to specify other specifications        
+    elif results == 4: # user selected high score
+        Start_screen.fill(black)
+        pygame.display.set_caption("HighScore Leaderboard")  
+        events = pygame.event.get()
+        event_types = [event.type for event in events]
+        while pygame.MOUSEBUTTONDOWN not in event_types:
+            display_high_score(Start_screen, highscore_archive_list)
+            events = pygame.event.get()
+            event_types = [event.type for event in events]
+        return 4
 
 def start_game():
     #load high score
     f = open('highscores.txt','r')
     highscore_archive = f.readlines()
-    level = start_menu(highscore_archive)
+    highscore_archive_list = convert_score_list(highscore_archive)
+    level = start_menu(highscore_archive_list)
     while level != None:
         if level == 4:
-            level = start_menu(highscore_archive)
+            level = start_menu(highscore_archive_list)
         else: 
-            new_game(highscore_archive = highscore_archive, level = level)
+            new_game(highscore_archive = highscore_archive_list, level = level)
             break
 
+def display_high_score(screen, highscore_list):
+    location = 1
+    inputask.update_text(screen, "High Scores", location, 24)
+    for user in highscore_list:
+        location +=1
+        #message = user[]
+        inputask.update_text(screen, user.name + ": "+ str(user.score) , location,20)  
+        
+def convert_score_list(highscore_archive):
+    highscores = []
+    if highscore_archive != []:
+
+         for i in range(len(highscore_archive)):
+             for j in range(len(highscore_archive[i])):
+                 if highscore_archive[i][j] == "+":
+                    archive_name = highscore_archive[i][0:j]
+                    archive_score = int(highscore_archive[i][j+1:len(highscore_archive[i])-1])
+                    highscores.append(User_Score(archive_name, archive_score))
+                    highscores = sorted(highscores, key=getKey, reverse=True)
+    else:
+        highscores = [User_Score("--empty--", 0),
+                      User_Score("--empty--", 0),
+                      User_Score("--empty--", 0),
+                      User_Score("--empty--", 0),
+                      User_Score("--empty--", 0),
+                      User_Score("--empty--", 0),
+                      User_Score("--empty--", 0),
+                      User_Score("--empty--", 0),
+                      User_Score("--empty--", 0),
+                      User_Score("--empty--", 0)]
+    return highscores
+    
 start_game()
