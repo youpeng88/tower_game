@@ -17,6 +17,7 @@ import math
 import inputask
 from example_menu import main as menu
 from difficulty_menu import main as level_menu
+from platform_menu import main as pl_menu
 # from dashedline import draw_dashed_line as draw_dash
 from dashedline2 import draw_dashed_line as draw_dash2
 
@@ -45,33 +46,37 @@ BAR_SIZE = (MAP_SIZE[0],SCREEN_SIZE[1]-3*MARGIN-MAP_SIZE[1])
 # default dimensions
 DIMENSIONS = (20,20)
 
-#PC Dictionary relating object type to the image files it uses and its dimensions
-#IMAGE_DICT = {}
-#IMAGE_DICT["base_tower"] = ("transparent_base_tower.png", (20, 40))
-#IMAGE_DICT["defense_tower"] = ("transparent_defense_tower.png", (20, 20))
-#IMAGE_DICT["enemy"] = ("transparent_enemy.png", (20, 20))
-#IMAGE_DICT["background"] = ("grass_background.png", MAP_SIZE)
-#IMAGE_DICT["gold_icon"] = ("gold_coins.png", (15,15))
-#IMAGE_DICT["tower_icon"] = ("defense_tower_icon.png", (15,15))
-#IMAGE_DICT["enemy_icon"] = ("enemy_icon.png", (15,15))
-#IMAGE_DICT["level"] = ("level.png", (15,15))
-#IMAGE_DICT["score"] = ("score.png", (15,15))
-
-#MAC Dictionary relating object type to the image files it uses and its dimensions
-IMAGE_DICT = {}
-IMAGE_DICT["base_tower"] = ("base_tower.bmp", (20, 40))
-IMAGE_DICT["defense_tower"] = ("defense_tower.bmp", (20, 20))
-IMAGE_DICT["enemy"] = ("enemy.bmp", (20, 20))
-IMAGE_DICT["background"] = ("grass_background.bmp", MAP_SIZE)
-IMAGE_DICT["gold_icon"] = ("gold_coins.bmp", (15,15))
-IMAGE_DICT["tower_icon"] = ("defense_tower_icon.bmp", (15,15))
-IMAGE_DICT["enemy_icon"] = ("enemy_icon.bmp", (15,15))
-IMAGE_DICT["level"] = ("level.bmp", (15,15))
-IMAGE_DICT["score"] = ("score_icon.bmp", (15,15))
-
 # define start screen
 pygame.init()
 
+def image_dictionary(extension):
+    if extension[0] == ".png":
+    #PC Dictionary relating object type to the image files it uses and its dimensions
+        IMAGE_DICT = {}
+        IMAGE_DICT["base_tower"] = ("transparent_base_tower.png", (20, 40))
+        IMAGE_DICT["defense_tower"] = ("transparent_defense_tower.png", (20, 20))
+        IMAGE_DICT["enemy"] = ("transparent_enemy.png", (20, 20))
+        IMAGE_DICT["background"] = ("grass_background.png", MAP_SIZE)
+        IMAGE_DICT["gold_icon"] = ("gold_coins.png", (15,15))
+        IMAGE_DICT["tower_icon"] = ("defense_tower_icon.png", (15,15))
+        IMAGE_DICT["enemy_icon"] = ("enemy_icon.png", (15,15))
+        IMAGE_DICT["level"] = ("level.png", (15,15))
+        IMAGE_DICT["score"] = ("score.png", (15,15))
+    else:
+        #MAC Dictionary relating object type to the image files it uses and its dimensions
+        IMAGE_DICT = {}
+        IMAGE_DICT["base_tower"] = ("base_tower.bmp", (20, 40))
+        IMAGE_DICT["defense_tower"] = ("defense_tower.bmp", (20, 20))
+        IMAGE_DICT["enemy"] = ("enemy.bmp", (20, 20))
+        IMAGE_DICT["background"] = ("grass_background.bmp", MAP_SIZE)
+        IMAGE_DICT["gold_icon"] = ("gold_coins.bmp", (15,15))
+        IMAGE_DICT["tower_icon"] = ("defense_tower_icon.bmp", (15,15))
+        IMAGE_DICT["enemy_icon"] = ("enemy_icon.bmp", (15,15))
+        IMAGE_DICT["level"] = ("level.bmp", (15,15))
+        IMAGE_DICT["score"] = ("score_icon.bmp", (15,15))
+        
+    return IMAGE_DICT
+    
 def map_border():
     xr = range(MARGIN+10,MAP_SIZE[0]+MARGIN-10)
     yr = range(MARGIN+10,MAP_SIZE[1]+MARGIN-10)
@@ -141,7 +146,7 @@ def sidebar(screen, tower_number, money, wavecount, level, score):
         update_text(screen, "Difficulty Level: Hard", 5, "level") 
      
         
-def new_game(saved_stats = None, highscore_archive = None, level = 1):
+def new_game(saved_stats = None, highscore_archive = None, level = 1, extension = ".bmp"):
     """
     Sets up all necessary components to start a new game
     of power tower.
@@ -150,6 +155,10 @@ def new_game(saved_stats = None, highscore_archive = None, level = 1):
     screen = pygame.display.set_mode(SCREEN_SIZE)
     pygame.display.set_caption("Tower Power") # caption sets title of Window
     screen.fill(black) # (0,0,0) represents RGB for black
+    
+    # load the image dictionary
+    global IMAGE_DICT
+    IMAGE_DICT = image_dictionary(extension)
 
     if saved_stats != None:
         tower_number = int(saved_stats[0])
@@ -666,17 +675,34 @@ def start_menu(highscore_archive_list):
     pygame.display.set_caption("Menu") # caption sets title of Window
     Start_screen.fill(black) # (0,0,0) represents RGB for black
     results = menu(Start_screen) # start = None, load = 2
+    
+    # load platform option
+    g = open('platform.txt','r')
+    extension = g.readlines()
 
     if results is None: # This means user selected start game
         Start_screen.fill(black)
+        pygame.display.set_caption("Difficulty Level")
         level = level_menu(Start_screen)
         return level      
     elif results == 2: # user selected LOAD game
         with open('saved_state.txt','r') as f:
             saved_state = f.readlines() # need to pass this into the game to update the state
-        new_game(saved_state,highscore_archive_list)
+        new_game(saved_state,highscore_archive_list,extension = extension)
         return None
-    # use options to specify other specifications        
+    # use options to specify operating system
+    elif results == 3:
+        Start_screen.fill(black)
+        pygame.display.set_caption("Platform") 
+        platform = pl_menu(Start_screen)
+        if platform != 4: # 4 refers to back
+            with open('platform.txt','w') as f:
+                if platform == 1:
+                    f.write(".png")
+                else:
+                    f.write(".bmp")
+        return 4
+        
     elif results == 4: # user selected high score
         Start_screen.fill(black)
         pygame.display.set_caption("HighScore Leaderboard")  
@@ -693,12 +719,17 @@ def start_game():
     f = open('highscores.txt','r')
     highscore_archive = f.readlines()
     highscore_archive_list = convert_score_list(highscore_archive)
+
+    # call start menu
     level = start_menu(highscore_archive_list)
     while level != None:
         if level == 4:
             level = start_menu(highscore_archive_list)
         else: 
-            new_game(highscore_archive = highscore_archive_list, level = level)
+            # load platform option
+            g = open('platform.txt','r')
+            extension = g.readlines()
+            new_game(highscore_archive = highscore_archive_list, level = level, extension = extension)
             break
 
 def display_high_score(screen, highscore_list):
