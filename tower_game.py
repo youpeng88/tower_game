@@ -155,7 +155,7 @@ def new_game(saved_stats = None, highscore_archive = None, level = 1, extension 
     of power tower.
     """
     #pygame.init() # initialize all imported pygame modules
-    screen_resolution = pygame.display.Info()
+#    screen_resolution = pygame.display.Info()
     screen = pygame.display.set_mode(SCREEN_SIZE, pygame.FULLSCREEN)
     pygame.display.set_caption("Tower Power") # caption sets title of Window
     screen.fill(black) # (0,0,0) represents RGB for black
@@ -250,7 +250,7 @@ def main_loop(screen, board, starting_varaibles, clock):
     username = starting_varaibles[14]
     money_earned_per_enemy = starting_varaibles[15]
 
-    time_created = 0
+#    time_created = 0
     # setup background
     BackGround = Background("background", [MARGIN, MARGIN])
     screen.blit(BackGround.image, BackGround.rect)
