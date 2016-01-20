@@ -18,6 +18,7 @@
     12:41 AM: Modified Enemies.point_at_base function such that all enemies now target base
     1/19/16 11:49 AM: Included text with lifebars
     1/19/16 1:53 PM: Enemies get stronger and give more money every 10 waves. Required a new initial variable money_earned_per_enemy
+    1/20/16 1:52 AM: Added new function Enemy.touching_another_enemy that ensures enemies are unstackable
 
 # Changes by Alex:
     1-18-16 10:30am: Changed the Enemy.point_at_base function to make all enemies move in the right direction. Changed the direction and distance calculation to floats and the speed to 2. Previously, enemies had speed one so any direction that was less than 1 would floor to zero. Now the directions floor to either 0, 1, or 2, but the upper left sprites no longer have both directions floor to zero
