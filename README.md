@@ -28,6 +28,7 @@
     1-19-16 02:26am: Added a highscore archive to keep track of and display highscores. This involved: creating a highscore class, saving the score, adding user input for name, calling the scores at the beginning. Also changed to grass background.
     1-20-16 11:47am: Made the game smoother by removing unnecessary clock tick. Fixed bug in menu which prevented entire screen from filling. Made score icon transparent.
     1-20-16 2:04pm:  Made the game fullscreen with smooth transitions between screens. Sidebar now on right for aesthetics. 
+    1-20-16 3:32pm:  Added knights that chase demons and can be placed with the right mousebutton
 
 # Latest Version: 
     1-19-16: Alex's recnet change merged (grass backgorund, userinput name and high score)
