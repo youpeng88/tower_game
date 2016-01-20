@@ -701,6 +701,7 @@ def start_menu():
     Start_screen = pygame.display.set_mode(MENU_SIZE)
     pygame.display.set_caption("Menu") # caption sets title of Window
     Start_screen.fill(black) # (0,0,0) represents RGB for black
+    pygame.display.flip()
     results = menu(Start_screen) # start = None, load = 2
     #load high score
     f = open('highscores.txt','r')
@@ -782,7 +783,7 @@ def display_instructions(screen):
     Game_money = "How to earn gold: kill enemies to earn gold and spend gold to build towers"
     Game_win = "How to win: kill as many enemies as possible to achieve higher score"
     
-    Enemy_grow = "Watch out! Enemies come out later with more HP and more killing power (also worth more gold!)"
+    Enemy_grow = "Watch out! Enemies come out later with more HP and more killing power"
 
     inputask.update_text(screen, "Instructions" , location,30)
     inputask.update_text(screen,  Tower_Placement, location+2, fontsize)
