@@ -16,6 +16,7 @@ import pygame
 import random
 import math
 import inputask
+import PygButton
 from example_menu import main as menu
 from difficulty_menu import main as level_menu
 from platform_menu import main as pl_menu
