@@ -13,6 +13,7 @@
     1-19-16(3:20pm): added PC and MAC choices at the start menu (remembers previous selection if don't change platform choice)
     1-19-16(5:10pm): Alex's recent changes merged (turn_based appearance) also fixed box input to make it a larger box (and some small bugs)
     1-19-16(6:30pm): added Instruction buttom on the start menu and merged the changes. 
+    1-20-16(3:40pm): fixed input box and merged Alex's changes
 
 #Latest Change by Zach:
     12:41 AM: Modified Enemies.point_at_base function such that all enemies now target base
@@ -40,4 +41,5 @@
     1-19-16(3:20pm): Yoyo's recent changes merged (added PC and MAC choices at the start menu (remembers previous selection if don't change platform choice)
     1-19-16(5:10pm): Alex's recent changes merged (turn_based appearance, also fixed box input)
     1-19-16(6:30pm): Yoyo's recent changes merged (added instruction buttom)
+    1-20-16(3:40pm): Yoyo and Alex's recent changes merged (menu, full screen, knights added and input box)
 
