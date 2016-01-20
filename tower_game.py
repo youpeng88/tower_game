@@ -700,7 +700,7 @@ def start_menu():
     pygame.init()
     Start_screen = pygame.display.set_mode(MENU_SIZE)
     pygame.display.set_caption("Menu") # caption sets title of Window
-    Start_screen.fill(black) # (0,0,0) represents RGB for black
+    Start_screen.fill(blue) # (0,0,0) represents RGB for black
     results = menu(Start_screen) # start = None, load = 2
     #load high score
     f = open('highscores.txt','r')
