@@ -33,23 +33,18 @@ green = (0, 255, 0)
 red   = (255, 0, 0)
 blue  = (0, 0, 255)
 
-# map size
-MAP_SIZE = (700, 600)  # (width in pixels, height in pixels)
-
-# margins (same for all sides)
-MARGIN = 10
 
 # screen size
-SCREEN_SIZE = (MAP_SIZE[0]+2*MARGIN,680)  # (width in pixels, height in pixels)
+SCREEN_SIZE = (1366, 768)
 
-# bar_size
-BAR_SIZE = (MAP_SIZE[0],SCREEN_SIZE[1]-3*MARGIN-MAP_SIZE[1])
+# margin
+MARGIN = SCREEN_SIZE[0]/20
 
-# menu size
-MENU_SIZE = [SCREEN_SIZE[0],350]
+# bar size
+BAR_SIZE = (SCREEN_SIZE[0]/5, SCREEN_SIZE[1])
 
-# default dimensions
-DIMENSIONS = (20,20)
+# map size
+MAP_SIZE = (SCREEN_SIZE[0] - 2*MARGIN - BAR_SIZE[0], SCREEN_SIZE[1] - 2*MARGIN)  # (width in pixels, height in pixels)
 
 # define start screen
 pygame.init()
@@ -66,7 +61,7 @@ def image_dictionary(extension):
         IMAGE_DICT["tower_icon"] = ("defense_tower_icon.png", (15,15))
         IMAGE_DICT["enemy_icon"] = ("enemy_icon.png", (15,15))
         IMAGE_DICT["level"] = ("level.png", (15,15))
-        IMAGE_DICT["score"] = ("score.png", (15,15))
+        IMAGE_DICT["score"] = ("score_icon.png", (15,15))
     else:
         #MAC Dictionary relating object type to the image files it uses and its dimensions
         IMAGE_DICT = {}
@@ -129,10 +124,11 @@ def update_text(screen, message, location,obj_type):
     textSize = 20
     font = pygame.font.Font(None, 20)
     textx = 0 + textSize
+    texty = 0 + textSize
     text = font.render(message, True, white, black)
     textRect = text.get_rect()
-    textRect.centery = 2*MARGIN + MAP_SIZE[1] + BAR_SIZE[1]/2
-    textRect.x = MARGIN+50+textx*(location-1)*6
+    textRect.centery = SCREEN_SIZE[1]/4 + texty*(location-1)*6
+    textRect.centerx = SCREEN_SIZE[0] - BAR_SIZE[0]/2
     screen.blit(text, textRect)
     icon = Background(obj_type, [textRect.x - 20, textRect.y])
     screen.blit(icon.image, icon.rect)
@@ -158,7 +154,8 @@ def new_game(saved_stats = None, highscore_archive = None, level = 1, extension 
     of power tower.
     """
     #pygame.init() # initialize all imported pygame modules
-    screen = pygame.display.set_mode(SCREEN_SIZE)
+    screen_resolution = pygame.display.Info()
+    screen = pygame.display.set_mode(SCREEN_SIZE, pygame.FULLSCREEN)
     pygame.display.set_caption("Tower Power") # caption sets title of Window
     screen.fill(black) # (0,0,0) represents RGB for black
     
@@ -356,29 +353,33 @@ def main_loop(screen, board, starting_varaibles, clock):
              events = pygame.event.get()
              event_types = [event.type for event in events] # update event list
 
+             for event in events:
+                 if event.type == pygame.KEYDOWN:
+                     if event.key == pygame.K_ESCAPE or event.key == pygame.K_BACKSPACE:
+                         gameover = True
+                         print "Paused Game"
+
              loop_number += 1
-    
-        pygame.display.quit()
-        pygame.init()
-        Start_screen = pygame.display.set_mode(MENU_SIZE)
+
+        Highscore_screen = pygame.display.set_mode(SCREEN_SIZE, pygame.FULLSCREEN)
         pygame.display.set_caption("HighScore Leaderboard") # caption sets title of Window
-        Start_screen.fill(black) # (0,0,0) represents RGB for black
+        Highscore_screen.fill(black) # (0,0,0) represents RGB for black
         for user in range(len(highscores)):
             if score > highscores[user].score:
-                inputask.display(Start_screen, "You Made It To The Top 10 Highscores!")
+                inputask.display(Highscore_screen, "You Made It To The Top 10 Highscores!")
                 pygame.time.wait(2000)
-                Start_screen.fill(black)
+                Highscore_screen.fill(black)
                 pygame.display.flip()
                 while True:     # Only allows for integer input, refuses any others
                     try:
-                        username = inputask.ask(Start_screen,"Please Enter Your Name ")
+                        username = inputask.ask(Highscore_screen,"Please Enter Your Name ")
                         break
                     except ValueError:
-                        inputask.display_box(Start_screen, "Please enter a string")
+                        inputask.display_box(Highscore_screen, "Please enter a string")
                 highscores.insert(user, User_Score(username, score))
-                Start_screen.fill(black)
+                Highscore_screen.fill(black)
                 pygame.display.set_caption("HighScore Leaderboard")  
-                display_high_score(Start_screen, highscores)
+                display_high_score(Highscore_screen, highscores)
                 pygame.time.wait(4000) 
                 break
             
@@ -387,14 +388,12 @@ def main_loop(screen, board, starting_varaibles, clock):
         if highscores == []:
             while True:     # Only allows for integer input, refuses any others
                 try:
-                    username = inputask.ask(Start_screen,"Please Enter Your Name: ")
+                    username = inputask.ask(Highscore_screen,"Please Enter Your Name: ")
                     break
                 except ValueError:
-                    inputask.display_box(Start_screen, "Please enter a string")
+                    inputask.display_box(Highscore_screen, "Please enter a string")
             highscores.insert(user, User_Score(username, score))
             break
- 
-        pygame.display.quit()
         mainloop = False
         
         # save current game data
@@ -698,7 +697,8 @@ class User_Score(object):
         
 def start_menu():
     pygame.init()
-    Start_screen = pygame.display.set_mode(MENU_SIZE)
+    screen_resolution = pygame.display.Info()
+    Start_screen = pygame.display.set_mode(SCREEN_SIZE, pygame.FULLSCREEN)
     pygame.display.set_caption("Menu") # caption sets title of Window
     Start_screen.fill(black) # (0,0,0) represents RGB for black
     pygame.display.flip()

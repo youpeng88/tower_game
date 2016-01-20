@@ -26,6 +26,8 @@
     1-18-16 11:10am: Modified the .png images for the sprites on the board to be transparent. For pygame on Windows the game can now have transparent pieces. It looks better? Maybe a better background?
     1-19-16 00:10am: Modified the save and load functionality to keep the defense_towers from the previous game upon load game.
     1-19-16 02:26am: Added a highscore archive to keep track of and display highscores. This involved: creating a highscore class, saving the score, adding user input for name, calling the scores at the beginning. Also changed to grass background.
+    1-20-16 11:47am: Made the game smoother by removing unnecessary clock tick. Fixed bug in menu which prevented entire screen from filling. Made score icon transparent.
+    1-20-16 2:04pm:  Made the game fullscreen with smooth transitions between screens. Sidebar now on right for aesthetics. 
 
 # Latest Version: 
     1-19-16: Alex's recnet change merged (grass backgorund, userinput name and high score)
@@ -37,3 +39,4 @@
     1-19-16(3:20pm): Yoyo's recent changes merged (added PC and MAC choices at the start menu (remembers previous selection if don't change platform choice)
     1-19-16(5:10pm): Alex's recent changes merged (turn_based appearance, also fixed box input)
     1-19-16(6:30pm): Yoyo's recent changes merged (added instruction buttom)
+
