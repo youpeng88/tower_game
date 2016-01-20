@@ -342,7 +342,11 @@ def main_loop(screen, board, starting_varaibles, clock):
                      print "Your Tower is Destroyed!"
                      print "Your Score is ", score
              else:
-                enemy.point_at_base(board)
+                 collision_with_another_enemy = enemy.touching_another_enemy(board)
+
+                 if collision_with_another_enemy is None:
+                     enemy.point_at_base(board)
+
              enemy.update()
 
          # action 5: enemies move    
@@ -660,6 +664,36 @@ class Enemies(Game_obj):
         if collision is not None:
             self.dx = 0
             self.dy = 0
+        return collision
+
+    def touching_another_enemy(self, board):
+        sprite_group_without_self = board.enemies.copy()
+        
+        sprite_group_without_self.remove(self)
+        collision = pygame.sprite.spritecollideany(self, sprite_group_without_self, collided=None)
+
+        if collision is not None:
+
+            directions = [(0,-1),(1,0),(0,1),(-1,0)]
+
+            random.shuffle(directions)
+
+            for (dx,dy) in directions:
+
+                self.rect = self.rect.move(dx,dy)
+
+                collision_in_new_path = pygame.sprite.spritecollideany(self, sprite_group_without_self, collided=None)
+
+                if collision_in_new_path is None:
+                    self.rect = self.rect.move(-dx,-dy)
+                    (self.dx,self.dy) = (dx,dy)
+                    break
+
+                self.rect = self.rect.move(-dx,-dy)
+
+            if collision_in_new_path is not None:
+                (self.dx,self.dy) = (0,0)
+
         return collision
 
     def update(self):
