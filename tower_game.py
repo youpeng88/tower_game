@@ -659,7 +659,9 @@ class Enemies(Game_obj):
 
         if collision is not None:
 
-            directions = [(0,-1),(1,0),(0,1),(-1,0)]
+            directions = [(0,2*int(self.speed_level*-0.5)),(2*int(self.speed_level*0.5),0),(0,2*int(self.speed_level*0.5)),(2*int(self.speed_level*-0.5),0),
+                          (2*int(self.speed_level*-0.5),2*int(self.speed_level*-0.5)),(2*int(self.speed_level*0.5),2*int(self.speed_level*0.5)),
+                          (2*int(self.speed_level*-0.5),2*int(self.speed_level*0.5)),(2*int(self.speed_level*0.5),2*int(self.speed_level*-0.5))]
 
             random.shuffle(directions)
 
