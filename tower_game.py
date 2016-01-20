@@ -290,15 +290,15 @@ def main_loop(screen, board, starting_varaibles, clock):
                      time = pygame.time.get_ticks()
                      if board.add_tower_to_board(time, (x,y), HP_tower, defense_range, attack_power_tower):
                          board.towers.draw(screen)
-                         pygame.display.flip()
+                         # pygame.display.flip()
                          money -= tower_cost
                          tower_number +=1
     
              #Updated Action 2 and 5 (move)
              num_border_locs = len(border)
              num_enemies = 2
-             time_period = 1000
-             elapsed_time = pygame.time.get_ticks() - time_created
+             # time_period = 1000
+             # elapsed_time = pygame.time.get_ticks() - time_created
              if loop_number - loop_created > 10:
                  enemies_count = 0
                  while enemies_count < num_enemies:
@@ -308,7 +308,7 @@ def main_loop(screen, board, starting_varaibles, clock):
                      board.add_enemy_to_board(time, (x,y),speed_level, HP_enemy, attack_power_enemy,money_earned_per_enemy)
                      enemies_count +=1
                  loop_created = loop_number
-                 time_created = pygame.time.get_ticks()
+                 # time_created = pygame.time.get_ticks()
                  wavecount +=1
             # Increase enemy HP by 10 and amount of money earned by 5 every 10 waves 
                  if wavecount % 10 == 0: 
@@ -339,18 +339,20 @@ def main_loop(screen, board, starting_varaibles, clock):
                      if collision_with_another_enemy is None:
                          enemy.point_at_base(board)
                  enemy.update()
-    
+
             # call sidebar        
              sidebar(screen, tower_number, money, wavecount,difficulty,score)
-    #        screen.fill(black) # (0,0,0) represents RGB for black
              screen.blit(BackGround.image, BackGround.rect)
-             board.towers.draw(screen)
-    
-             board.enemies.draw(screen)
-             # update life bar
+
+             board.towers.update()
+             board.enemies.update()
              board.lifebars.update()
-             # board.lifebars.draw(screen)
-        
+
+             board.towers.draw(screen)
+             board.enemies.draw(screen)
+
+             pygame.display.flip()
+
              events = pygame.event.get()
              event_types = [event.type for event in events] # update event list
 
