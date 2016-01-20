@@ -66,7 +66,7 @@ def update_text(screen, message, location, fontsize):
     texty = 0 + textSize
     text = font.render(message, True, (255,255,255), (0,0,0))
     textRect = text.get_rect()
-    textRect.centery = 10 + location*texty
+    textRect.centery = screen.get_height()/3 + location*texty
     textRect.centerx = (screen.get_width() / 2)
     screen.blit(text, textRect)
     pygame.display.flip()
