@@ -44,6 +44,7 @@
     1-19-16(5:10pm): Alex's recent changes merged (turn_based appearance, also fixed box input)
     1-19-16(6:30pm): Yoyo's recent changes merged (added instruction buttom)
     1-20-16(3:40pm): Yoyo and Alex's recent changes merged (menu, full screen, knights added and input box)
-    1-20-16(7:30pm): Yoyo's recent changes merged (added selection button on the side bar)
+    1-20-16(7:30pm): Yoyo's recent changes merged (added selection button on the side bar for defense units)
+    1-20-16(7:34pm): Zach's recent changes merged (improved enemy self avoidance)
     
 
