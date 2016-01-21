@@ -33,6 +33,8 @@
     1-20-16 11:47am: Made the game smoother by removing unnecessary clock tick. Fixed bug in menu which prevented entire screen from filling. Made score icon transparent.
     1-20-16 2:04pm:  Made the game fullscreen with smooth transitions between screens. Sidebar now on right for aesthetics. 
     1-20-16 3:32pm:  Added knights that chase demons and can be placed with the right mousebutton
+    1-21-16 1:10am:  Make the save_game feature save the knights and enemies as well. Added functionality for game start and menu performance if no .txt files for platform, highscores, or saved_state. Game now saves username for highscore purposes.
+    1-21-16 2:08am:  Fixed tower cannonball range issue. Fixed no platform issue.
 
 # Latest Version: 
     1-19-16: Alex's recnet change merged (grass backgorund, userinput name and high score)
@@ -46,6 +48,6 @@
     1-19-16(6:30pm): Yoyo's recent changes merged (added instruction buttom)
     1-20-16(3:40pm): Yoyo and Alex's recent changes merged (menu, full screen, knights added and input box)
     1-20-16(7:30pm): Yoyo's recent changes merged (added selection button on the side bar for defense units)
-    1-20-16(7:34pm): Zach's recent changes merged (improved enemy self avoidance)
+    1-20-16(7:34pm): Zach's recent changes merged (improved enemy self avoidance
     
 
