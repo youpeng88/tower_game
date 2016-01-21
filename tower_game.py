@@ -64,6 +64,9 @@ def image_dictionary(extension):
         IMAGE_DICT["enemy_icon"] = ("enemy_icon.png", (15,15))
         IMAGE_DICT["level"] = ("level.png", (15,15))
         IMAGE_DICT["score"] = ("score_icon.png", (15,15))
+        IMAGE_DICT["knight_click"] = ("knight_click.png", (15,15))
+        IMAGE_DICT["tower"] = ("tower_icon.png", (15,15))
+        IMAGE_DICT["tower_click"] = ("tower_click.png", (15,15))
     else:
         #MAC Dictionary relating object type to the image files it uses and its dimensions
         IMAGE_DICT = {}
@@ -77,6 +80,9 @@ def image_dictionary(extension):
         IMAGE_DICT["enemy_icon"] = ("enemy_icon.bmp", (15,15))
         IMAGE_DICT["level"] = ("level.bmp", (15,15))
         IMAGE_DICT["score"] = ("score_icon.bmp", (15,15))
+        IMAGE_DICT["knight_click"] = ("knight_click.bmp", (15,15))
+        IMAGE_DICT["tower"] = ("tower_icon.bmp", (15,15))
+        IMAGE_DICT["tower_click"] = ("tower_click.bmp", (15,15))
         
     return IMAGE_DICT
     
@@ -118,38 +124,6 @@ def angle(v1, v2):
 
 def getKey(user_score):
     return user_score.score
-
-def update_text(screen, message, location,obj_type):
-    """
-    Used to display the text on the right-hand part of the screen.
-    location will be used to decide what variable to display: tower number, money, wave
-    """
-    textSize = 20
-    font = pygame.font.Font(None, 20)
-    textx = 0 + textSize
-    texty = 0 + textSize
-    text = font.render(message, True, white, black)
-    textRect = text.get_rect()
-    textRect.centery = SCREEN_SIZE[1]/4 + texty*(location-1)*6
-    textRect.centerx = SCREEN_SIZE[0] - BAR_SIZE[0]/2
-    screen.blit(text, textRect)
-    icon = Background(obj_type, [textRect.x - 20, textRect.y])
-    screen.blit(icon.image, icon.rect)
-
-def sidebar(screen, tower_number, money, wavecount, level, score):
-    screen.fill(black)
-    update_text(screen, "Tower #: " + str(tower_number), 1, "tower_icon")
-    update_text(screen, "Money: " + str(money), 2, "gold_icon")
-    update_text(screen, "Wave #: " + str(wavecount), 3, "enemy_icon") 
-    update_text(screen, "Score #: " + str(score), 4, "score")
-    if level == 1:
-        if os.path.isfile('saved_state.txt'):
-            update_text(screen, "Difficulty Level: Easy", 5, "level")
-    elif level == 2:
-        update_text(screen, "Difficulty Level: Medium", 5, "level") 
-    else:
-        update_text(screen, "Difficulty Level: Hard", 5, "level") 
-     
         
 def new_game(saved_stats = None, highscore_archive = None, level = 1, extension = ".bmp"):
     """
@@ -237,10 +211,14 @@ def new_game(saved_stats = None, highscore_archive = None, level = 1, extension 
     board = Board(HP_base[difficulty-1],screen,defense_range_base[difficulty-1], attack_power_base[difficulty-1])
 
     clock = pygame.time.Clock()
+    
+    sidebar = siderbar(screen)
+    sidebar.add_button("tower","tower_click", (0,1))
+    sidebar.add_button("knight","knight_click", (1,1))
 
-    main_loop(screen, board, starting_varaibles, clock)
+    main_loop(screen, board, starting_varaibles, clock, sidebar)
 
-def main_loop(screen, board, starting_varaibles, clock):
+def main_loop(screen, board, starting_varaibles, clock, sidebar):
     HP_enemy = starting_varaibles[0]
     HP_tower = starting_varaibles[1]
     speed_level = starting_varaibles[2]
@@ -275,7 +253,14 @@ def main_loop(screen, board, starting_varaibles, clock):
                 board.towers.draw(screen)
                 pygame.display.flip()
 
-
+    # set default button click to tower
+    sidebar.button_list["tower"].buttonDown = True
+    sidebar.button_list["knight"].buttonDown = False
+    sidebar.display_text(tower_number,knight_number, money, wavecount,difficulty,score)
+    sidebar.display_button()
+    defense_mode = "tower"
+    pygame.display.flip()
+        
     board.towers.draw(screen) # draw tower Sprite
     pygame.display.flip()
     
@@ -287,12 +272,30 @@ def main_loop(screen, board, starting_varaibles, clock):
     loop_number = 0
     loop_created = 0
     
+    
     while mainloop == True:
         while pygame.QUIT not in event_types and gameover is not True: # when use didn't click exit on the window    
-             #pygame.display.flip()
+            
+            # check if defense_mode has changed and display in button
+             for event in events:
+                 if 'click' in sidebar.button_list["tower"].handleEvent(event):           
+                 #if sidebar.button_list["tower"].buttonDown == True:               
+                     sidebar.display_button()
+                     defense_mode = "tower"
+                 if 'click' in sidebar.button_list["knight"].handleEvent(event): 
+                 #if sidebar.button_list["knight"].buttonDown == True:
+                     sidebar.display_button()
+                     defense_mode = "knight" 
     
+             if defense_mode == "tower":
+                 sidebar.button_list["tower"].buttonDown = True
+                 sidebar.button_list["knight"].buttonDown = False
+             else:
+                 sidebar.button_list["tower"].buttonDown = False
+                 sidebar.button_list["knight"].buttonDown = True
+                 
              # action 1: add tower
-             if pygame.mouse.get_pressed()[0]:
+             if defense_mode == "tower" and pygame.mouse.get_pressed()[0]:
                  if money >= tower_cost:
                      x,y = pygame.mouse.get_pos()
                  # add a defense tower at the location clicked
@@ -303,7 +306,7 @@ def main_loop(screen, board, starting_varaibles, clock):
                          tower_number +=1
 
              # action 1: add kight
-             if pygame.mouse.get_pressed()[2]:
+             if defense_mode == "knight" and pygame.mouse.get_pressed()[0]:
                  if money >= knight_cost:
                      x,y = pygame.mouse.get_pos()
                  # add a knight at the location clicked
@@ -373,8 +376,10 @@ def main_loop(screen, board, starting_varaibles, clock):
                          enemy.point_at_base(board)
                  enemy.update()
 
-            # call sidebar        
-             sidebar(screen, tower_number, money, wavecount,difficulty,score)
+            # call sidebar                  
+             sidebar.display_text(tower_number,knight_number, money, wavecount,difficulty,score)
+             sidebar.display_button()
+             
              screen.blit(BackGround.image, BackGround.rect)
 
              board.towers.update()
@@ -460,6 +465,58 @@ class Background(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(self.image, IMAGE_DICT[obj_type][1])
         self.rect = self.image.get_rect()
         self.rect.left, self.rect.top = position
+        
+class siderbar():
+    def __init__(self,screen):
+        self.screen = screen
+        self.button_list = {}
+    
+    def update_text(self, message, location,obj_type):
+        """
+        Used to display the text on the right-hand part of the screen.
+        location will be used to decide what variable to display: tower number, money, wave
+        """
+        textSize = 20
+        font = pygame.font.Font(None, 20)
+        textx = 0 + textSize
+        texty = 0 + textSize*6
+        text = font.render(message, True, white, black)
+        textRect = text.get_rect()
+        textRect.centery = MARGIN + texty*(location-1)
+        textRect.centerx = SCREEN_SIZE[0] - BAR_SIZE[0]/2
+        self.screen.blit(text, textRect)
+        icon = Background(obj_type, [textRect.x - 20, textRect.y])
+        self.screen.blit(icon.image, icon.rect) 
+    
+    def add_button(self, obj_type1, obj_type2, location):
+        button_rect = pygame.Rect(SCREEN_SIZE[0]-BAR_SIZE[0]*3/4+70*location[0],MARGIN + 30*location[1], BAR_SIZE[0]/5, 40)
+        my_Button = PygButton.PygButton(button_rect,'lala',bgcolor=white,fgcolor=red)
+        my_Button.setSurfaces(IMAGE_DICT[obj_type1][0],IMAGE_DICT[obj_type2][0],IMAGE_DICT[obj_type1][0]) # set tower picture as button        
+        self.button_list[obj_type1] = my_Button
+        
+    def update_button(self,event):
+        for my_Button in self.button_list.values():
+            my_Button.handleEvent(event)
+    
+    def display_button(self):
+        for my_Button in self.button_list.values():
+            my_Button._visible = True
+            my_Button.draw(self.screen)
+    
+    def display_text(self, tower_number,knight_number, money, wavecount,level,score):
+        self.screen.fill(black)
+        self.update_text("Tower #: " + str(tower_number) + "  Knight #: " + str(knight_number), 1, "tower_icon")
+        self.update_text("Money: " + str(money), 2, "gold_icon")
+        self.update_text("Wave #: " + str(wavecount), 3, "enemy_icon") 
+        self.update_text("Score #: " + str(score), 4, "score")
+        if level == 1:
+            if os.path.isfile('saved_state.txt'):
+                self.update_text("Difficulty Level: Easy", 5, "level")
+        elif level == 2:
+            self.update_text("Difficulty Level: Medium", 5, "level") 
+        else:
+            self.update_text("Difficulty Level: Hard", 5, "level") 
+
 
 class Board:
     def __init__(self, HP_base,screen,defense_range, attack_power):
@@ -532,17 +589,21 @@ class Board:
 
     def add_knight_to_board(self, time, position, HP_knight, attack_power):
         knight = Knight(self, time, position, "knight", HP_knight, attack_power)
-        collision_tower = pygame.sprite.spritecollideany(knight, self.towers, None)
-        collision_enemy = pygame.sprite.spritecollideany(knight, self.enemies, None)
-        collision_knight = pygame.sprite.spritecollideany(knight, self.knights, None)
-        if collision_tower is None and collision_enemy is None and collision_knight is None:
-            self.knight_dict[time] = knight
-            self.knights.add(knight)
-            knight_lifebar = Lifebar(self, time, knight, self.screen, HP_knight)
-
-            # Add knight lifebar to lifebar dict and Sprite group
-            self.lifebar_dict[time] = knight_lifebar
-            self.lifebars.add(knight_lifebar)
+        if knight.rect.x < MARGIN or knight.rect.topright[0] > MARGIN + MAP_SIZE[0] or knight.rect.y < MARGIN or knight.rect.bottomleft[1] > MARGIN + MAP_SIZE[1]:
+            return False
+        else:
+            collision_tower = pygame.sprite.spritecollideany(knight, self.towers, None)
+            collision_enemy = pygame.sprite.spritecollideany(knight, self.enemies, None)
+            collision_knight = pygame.sprite.spritecollideany(knight, self.knights, None)
+            if collision_tower is None and collision_enemy is None and collision_knight is None:
+                self.knight_dict[time] = knight
+                self.knights.add(knight)
+                knight_lifebar = Lifebar(self, time, knight, self.screen, HP_knight)
+    
+                # Add knight lifebar to lifebar dict and Sprite group
+                self.lifebar_dict[time] = knight_lifebar
+                self.lifebars.add(knight_lifebar)
+                return True
 
     def draw_laser_line(self, enemy_position, tower_position):
         # draws normal solid line
