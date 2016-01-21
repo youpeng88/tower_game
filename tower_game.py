@@ -67,6 +67,8 @@ def image_dictionary(extension):
         IMAGE_DICT["tower"] = ("tower_icon.png", (15,15))
         IMAGE_DICT["tower_click"] = ("tower_click.png", (15,15))
         IMAGE_DICT["cannonball"] = ("cannonball.png", (10,10))
+        IMAGE_DICT["dragon"] = ("dragon.png", (40,40))
+
     else:
         #MAC Dictionary relating object type to the image files it uses and its dimensions
         IMAGE_DICT = {}
@@ -84,6 +86,8 @@ def image_dictionary(extension):
         IMAGE_DICT["tower"] = ("tower_icon.bmp", (15,15))
         IMAGE_DICT["tower_click"] = ("tower_click.bmp", (15,15))
         IMAGE_DICT["cannonball"] = ("cannonball.bmp", (10,10))
+        IMAGE_DICT["dragon"] = ("dragon.bmp", (40,40))
+
         
     return IMAGE_DICT
  
@@ -273,6 +277,8 @@ def display_high_score(screen, highscore_list):
         location +=1
         #message = user[]
         inputask.update_text(screen, "Top " + str(location-2) +" : "+user.name + ",  "+ str(user.score) , location,22)  
+        if location > 12:
+            break
  
 # function used to generate high score list using user_score objects       
 def convert_score_list(highscore_archive):
@@ -337,6 +343,7 @@ def new_game(saved_stats, highscore_archive, extension, level):
         tower_list = []
         enemy_list = []
         knight_list = []
+        dragon_list = []
         username = saved_stats[6][1:len(saved_stats[6])-1]
         for i in range(len(saved_stats)):
              if saved_stats[i][0] == "t":
@@ -369,6 +376,16 @@ def new_game(saved_stats, highscore_archive, extension, level):
                                 time = int(saved_stats[i][k+1:len(saved_stats[i])-1])
                                 if time != 0:
                                     knight_list.append([time, (x,y)])
+             elif saved_stats[i][0] == "d":
+                 for j in range(len(saved_stats[i])):
+                    if saved_stats[i][j] == ",":
+                        for k in range(len(saved_stats[i])):
+                            if saved_stats[i][k] == "+":
+                                x = int(saved_stats[i][2:j])
+                                y = int(saved_stats[i][j+2:k-1])
+                                time = int(saved_stats[i][k+1:len(saved_stats[i])-1])
+                                if time != 0:
+                                    dragon_list.append([time, (x,y)])
                                     
     # if not loading an old game, starts a new game based on difficulty level
     else:
@@ -378,6 +395,7 @@ def new_game(saved_stats, highscore_archive, extension, level):
         tower_list = None
         enemy_list = None
         knight_list = None
+        dragon_list = None
         difficulty = 1
         score = 0
         username = None
@@ -393,11 +411,13 @@ def new_game(saved_stats, highscore_archive, extension, level):
     HP_tower = [500, 500, 600]
     HP_base = [1000, 1200, 1200]
     HP_knight = [200,300,400]
+    HP_dragon = [200,300,400]
     speed_level = [1,2,3]
     defense_range = [200, 150, 100]
     attack_power_tower = [50, 75, 100]
     attack_power_enemy = [5,5,5]
     attack_power_knight = [10,10,10]
+    attack_power_dragon = [10,10,10]
     tower_cost = [500,500,500]
     knight_cost = [100,100,100]
     money_earned_per_enemy = 50
@@ -427,7 +447,10 @@ def new_game(saved_stats, highscore_archive, extension, level):
                           tower_reload_time,
                           enemy_list,
                           knight_list,
-                          HP_knight[difficulty-1]]
+                          HP_knight[difficulty-1],
+                          HP_dragon[difficulty-1],
+                          attack_power_dragon[difficulty-1],
+                          dragon_list]
     
     # initialize the board with base tower
     board = Board(HP_base[difficulty-1],screen,defense_range_base[difficulty-1], attack_power_base[difficulty-1])
@@ -469,6 +492,9 @@ def main_loop(screen, board, starting_varaibles, clock, sidebar):
     enemy_list = starting_varaibles[20]
     knight_list = starting_varaibles[21]
     HP_knight = starting_varaibles[22]
+    HP_dragon = starting_varaibles[23]
+    attack_power_dragon = starting_varaibles[24]
+    dragon_list = starting_varaibles[25]
 
     # setup background
     BackGround = Background("background", [MARGIN, MARGIN])
@@ -493,9 +519,16 @@ def main_loop(screen, board, starting_varaibles, clock, sidebar):
             position = knight_list[i][1]
             if board.add_knight_to_board(time, position, HP_knight, attack_power_knight):
                 board.knights.draw(screen)
+                
+    if dragon_list is not None:
+        for i in range(len(dragon_list)):
+            time = dragon_list[i][0]
+            position = dragon_list[i][1]
+            if board.add_dragon_to_board(time, position, speed_level, HP_dragon, attack_power_dragon, money_earned_per_enemy):
+                board.dragons.draw(screen)
     pygame.display.flip()
 
-    # set default button click/defense type to tower
+    # set default button click to tower
     sidebar.button_list["tower"].buttonDown = True
     sidebar.button_list["knight"].buttonDown = False
     sidebar.display_text(tower_number,knight_number, money, wavecount,difficulty,score)
@@ -516,8 +549,7 @@ def main_loop(screen, board, starting_varaibles, clock, sidebar):
     mainloop = True
     loop_number = 0
     loop_created = 0
-    money_earned = 0
-    
+    money_earned = 0   
     
     while mainloop == True: # when game is not over and highscore is not checked
         while pygame.QUIT not in event_types and gameover is not True: # when use didn't click exit on the window    
@@ -570,13 +602,20 @@ def main_loop(screen, board, starting_varaibles, clock, sidebar):
                      index = random.randint(0,num_border_locs-1)
                      x,y = border[index]
                      time = pygame.time.get_ticks()
-                     board.add_enemy_to_board(time, (x,y),speed_level, HP_enemy, attack_power_enemy,money_earned_per_enemy)
+
+                     #Add a dragon to the board every 5 waves
+                     if wavecount % 5 == 0 and wavecount > 5:
+                         board.add_dragon_to_board(time, (x,y),speed_level, HP_dragon, attack_power_dragon,money_earned_per_enemy)
+                     else:
+                         board.add_enemy_to_board(time, (x,y),speed_level, HP_enemy, attack_power_enemy,money_earned_per_enemy)
+
                      enemies_count +=1
                  loop_created = loop_number
                  wavecount +=1
             # Increase enemy HP by 10 and amount of money earned by 5 every 10 waves 
                  if wavecount % 10 == 0: 
                      HP_enemy += 10
+                     HP_dragon += 10
                      money_earned_per_enemy += 5                 
              
              # action 3: defense attacks enemy (shoot)
@@ -612,6 +651,22 @@ def main_loop(screen, board, starting_varaibles, clock, sidebar):
                      if collision_with_another_enemy is None:
                          enemy.point_at_base(board)
 
+            # action 4: dragon attacks defense and base tower
+             for dragon in board.dragons:
+                 collision = dragon.touching_defense_or_base_tower(board)
+                 if collision is not None:
+                     dragon.attack(collision, board)
+                     if board.tower_dict[0] is None:
+                         gameover = True
+                         print "Your Tower is Destroyed!"
+                         print "Your Score is ", score
+                         break
+                 else:
+                     collision_with_another_dragon = dragon.touching_another_dragon(board)
+        
+                     if collision_with_another_dragon is None:
+                         dragon.point_at_tower(board)
+                         
             # shoot cannonballs at enemies
              for cannonball in board.cannonballs:
                 money_earned = cannonball.attack(board)
@@ -619,8 +674,7 @@ def main_loop(screen, board, starting_varaibles, clock, sidebar):
                     score += money_earned*difficulty
                     money += money_earned
 
-
-            # update sidebar, towers, enemies, knights and all other sprite objects
+            # update sidebar, towers, enemies, knights, dragons and all other sprite objects
              sidebar.display_text(tower_number,knight_number, money, wavecount,difficulty,score)
              sidebar.display_button()
              
@@ -631,13 +685,15 @@ def main_loop(screen, board, starting_varaibles, clock, sidebar):
              board.lifebars.update()
              board.knights.update()
              board.cannonballs.update()
+             board.dragons.update()
 
              board.cannonballs.draw(screen)
              board.towers.draw(screen)
              board.enemies.draw(screen)
              board.knights.draw(screen)
+             board.dragons.draw(screen)
              
-             # display
+             # display            
              pygame.display.flip()
              
              # update event list
@@ -645,6 +701,12 @@ def main_loop(screen, board, starting_varaibles, clock, sidebar):
              event_types = [event.type for event in events] # update event list
              
              # provide game pause choice and goes back to main menu
+             for event in events:
+                 if event.type == pygame.KEYDOWN:
+                     if event.key == pygame.K_ESCAPE or event.key == pygame.K_BACKSPACE:
+                         gameover = True
+                         print "Paused Game"
+
              for event in events:
                  if event.type == pygame.KEYDOWN:
                      if event.key == pygame.K_ESCAPE or event.key == pygame.K_BACKSPACE:
@@ -672,6 +734,7 @@ def main_loop(screen, board, starting_varaibles, clock, sidebar):
                             break
                         except ValueError:
                             inputask.display_box(Highscore_screen, "Please enter a string")
+                            
                 # add highscore to highscore list
                 highscores.insert(user, User_Score(username, score))
                 Highscore_screen.fill(black)
@@ -712,7 +775,9 @@ def main_loop(screen, board, starting_varaibles, clock, sidebar):
                 f.write("e"+str(enemy.position)+"+"+str(enemy.time) + "\n")
             for knight in board.knights:
                 f.write("k"+str(knight.position)+"+"+str(knight.time) + "\n")
-    
+            for dragon in board.dragons:
+                f.write("d"+str(dragon.position)+"+"+str(dragon.time) + "\n")
+                
         with open('highscores.txt','w') as f:
             for user in range(len(highscores)):
                 f.write(str(highscores[user].name)+"+"+str(highscores[user].score) + "\n")
@@ -821,6 +886,10 @@ class Board:
         self.cannonball_dict = {}
         self.cannonballs = pygame.sprite.Group()
 
+        # Create dragon dict and Sprite group
+        self.dragon_dict = {}
+        self.dragons = pygame.sprite.Group()
+        
     def add_tower_to_board(self, time, position, HP_tower,defense_range, attack_power, tower_reload_time):
         defense_tower = Tower(self, time, position, "defense_tower", HP_tower, defense_range, attack_power, tower_reload_time)
         if defense_tower.rect.x < MARGIN or defense_tower.rect.topright[0] > MARGIN + MAP_SIZE[0] or defense_tower.rect.y < MARGIN or defense_tower.rect.bottomleft[1] > MARGIN + MAP_SIZE[1]:
@@ -829,7 +898,8 @@ class Board:
             collision_tower = pygame.sprite.spritecollideany(defense_tower, self.towers, None)
             collision_enemy = pygame.sprite.spritecollideany(defense_tower, self.enemies, None)
             collision_knight = pygame.sprite.spritecollideany(defense_tower, self.knights, None)
-            if collision_tower is None and collision_enemy is None and collision_knight is None:
+            collision_dragon = pygame.sprite.spritecollideany(defense_tower, self.dragons, None)
+            if collision_tower is None and collision_enemy is None and collision_knight is None and collision_dragon is None:
                 self.tower_dict[time] = defense_tower
                 self.towers.add(defense_tower)
                 defense_tower_lifebar = Lifebar(self, time, defense_tower, self.screen, HP_tower)
@@ -870,20 +940,24 @@ class Board:
                 self.lifebar_dict[time] = knight_lifebar
                 self.lifebars.add(knight_lifebar)
                 return True
+                
+    def add_dragon_to_board(self, time, position, speed_level, HP_dragon, attack_power, money_earned_per_enemy):
+        dragon = Dragons(self, time, position, "dragon", HP_dragon, speed_level, attack_power, money_earned_per_enemy)
+        collision_tower = pygame.sprite.spritecollideany(dragon, self.towers, None)
+        collision_dragon = pygame.sprite.spritecollideany(dragon, self.dragons, None)
+        if collision_tower is None and collision_dragon is None:
+            self.dragon_dict[time] = dragon
+            self.dragons.add(dragon)
+            dragon_lifebar = Lifebar(self, time, dragon, self.screen, HP_dragon)
 
+            # Add defense tower lifebar to lifebar dict and Sprite group
+            self.lifebar_dict[time] = dragon_lifebar
+            self.lifebars.add(dragon_lifebar)
+    
     def add_cannonball_to_board(self, time, position, HP_cannonball, attack_power, tower):
         cannonball = Cannonball(self, time, position, "cannonball", HP_cannonball, attack_power, tower)
         self.cannonball_dict[time] = cannonball
         self.cannonballs.add(cannonball)
-
-
-    # def draw_laser_line(self, enemy_position, tower_position):
-    #     # draws normal solid line
-    #     pygame.draw.line(self.screen, black, tower_position, enemy_position, 2)
-    #
-    #     # if we want to draw dashed line
-    #     #draw_dash(self.screen, black, tower_position, enemy_position, dash_length = 5)
-    #     # draw_dash2(self.screen, red, tower_position, enemy_position, width = 2, dash_length = 5)
        
 class Game_obj(pygame.sprite.Sprite):
     def __init__(self, board, time, position, obj_type, init_HP, attack_power):
@@ -976,6 +1050,12 @@ class Tower(Game_obj):
                 closest_distance = distance
                 e_position = enemy.position
                 final_enemy = enemy
+        for dragon in self.board.dragons:
+            distance = calc_distance(self.position, dragon.position)
+            if distance < closest_distance:
+                closest_distance = distance
+                e_position = dragon.position
+                final_enemy = dragon
         if e_position != None:
             return final_enemy
 
@@ -1026,9 +1106,12 @@ class Cannonball(Game_obj):
                 self.dy = 0
 
     def touching_enemy(self, board):
-        collision = pygame.sprite.spritecollideany(self, board.enemies, collided=None)
-        if collision is not None:
-            return collision
+        collision_enemy = pygame.sprite.spritecollideany(self, board.enemies, collided=None)
+        collision_dragon = pygame.sprite.spritecollideany(self, board.dragons, collided=None)
+        if collision_dragon is not None:
+            return collision_dragon
+        elif collision_enemy is not None:
+            return collision_enemy
         else:
             return None
 
@@ -1150,8 +1233,6 @@ class Knight(Game_obj):
 
     def update(self):
         # add in angles from find direction to base tower
-#        self.rect.x += self.dx
-#        self.rect.y += self.dy
         self.rect = self.rect.move(self.dx,self.dy)
         self.position = self.rect.center
 
@@ -1171,7 +1252,6 @@ class Enemies(Game_obj):
         distance = calc_distance(self.position, board.base_tower.position)
         new_orientation = (direction[0]/distance, direction[1]/distance)
         rotate_angle = angle(new_orientation, self.orientation)
-#        print "angle: ", rotate_angle
         if rotate_angle > 5:
             self.image = pygame.transform.rotate(self.image, rotate_angle)
         self.dx = int(self.speed_level*(new_orientation[0]))
@@ -1262,6 +1342,140 @@ class Enemies(Game_obj):
         self.rect = self.rect.move(self.dx,self.dy)
         self.position = self.rect.center
 
+class Dragons(Game_obj):
+    def __init__(self, board, time, position, obj_type, init_HP, level, attack_power, money_earned_per_enemy):
+        super(Dragons,self).__init__(board, time, position, obj_type, init_HP, attack_power)
+        self.orientation = (0.0, 1.0) #points up initially
+        self.speed_level = 2*2*level #Dragons are twice as fast as other enemies
+        self.dx = 0
+        self.dy = 0
+        self.point_at_tower(board)
+        self.money_earned_per_enemy = money_earned_per_enemy
+        self.living = True
+
+    def point_at_tower(self, board): # moving direction
+        tower = self.closest_tower()
+        if tower is not None:
+            direction = (float(tower.position[0] - self.position[0]), float(tower.position[1] - self.position[1]))
+            distance = calc_distance(self.position, tower.position)
+            new_orientation = (direction[0]/distance, direction[1]/distance) 
+            rotate_angle = angle(new_orientation, self.orientation)
+            if rotate_angle > 1:
+                if rotate_angle >=90 and rotate_angle <180:
+                    if new_orientation[0] <0 :
+                        self.image = pygame.transform.rotate(self.image,180-rotate_angle)
+                    else:
+                        self.image = pygame.transform.rotate(self.image,-180+rotate_angle)
+                elif rotate_angle >=0 and rotate_angle < 90:
+                    if new_orientation[0] <0 :
+                        self.image = pygame.transform.rotate(self.image,180-rotate_angle)
+                    else:
+                        self.image = pygame.transform.rotate(self.image,-180+rotate_angle)
+            # knights have to rotate too much
+##            rotate_angle = angle(new_orientation, self.orientation)
+##            if rotate_angle > 1:
+##                self.image = pygame.transform.rotate(self.image, rotate_angle)
+            self.dx = int(self.speed_level*(new_orientation[0]))
+            self.dy = int(self.speed_level*(new_orientation[1]))
+            self.orientation = new_orientation
+
+    def closest_tower(self):
+        t_position = None
+        final_tower = None
+        closest_distance = MAP_SIZE[1]
+        for tower in self.board.towers:
+            if tower == self.board.base_tower:
+                continue
+            distance = calc_distance(self.position, tower.position)
+            if distance < closest_distance:
+                closest_distance = distance
+                t_position = tower.position
+                final_tower = tower
+        if t_position != None:
+            return final_tower
+        else:
+            return self.board.base_tower
+        return False
+        
+    def set_new_speed(self,new_level):
+        self.speed_level = 1*new_level
+
+    def attack(self, collision, board):
+        collision.HP -= self.attack_power
+        if collision.HP <= 0:
+            collision.death(board)
+
+    def death(self, board):
+        # need to remove the object from the board
+        # from dic list
+        time = self.time
+        self.living = False
+        board.dragon_dict[time] = None
+        lifebar = board.lifebar_dict[time]
+        lifebar.kill()
+        board.lifebar_dict[time] = None
+        self.kill()
+        self.update()
+        lifebar.update()
+        return self.money_earned_per_enemy
+        
+    def touching_defense_or_base_tower(self, board):
+        collision_tower = pygame.sprite.spritecollideany(self, board.towers, collided=None)
+        if collision_tower is not None:
+            self.dx = 0
+            self.dy = 0
+            return collision_tower
+        return None
+
+    def touching_another_dragon(self, board):
+        sprite_group_without_self = board.dragons.copy()
+        
+        sprite_group_without_self.remove(self)
+        collision = pygame.sprite.spritecollideany(self, sprite_group_without_self, collided=None)
+
+        if collision is not None or (self.dx,self.dy) == (0,0):
+
+            collision = True
+
+            for escape_speed_multiplier in range(1,20):
+                
+                directions = [(0,escape_speed_multiplier*int(self.speed_level*-0.5)),(escape_speed_multiplier*int(self.speed_level*0.5),0),
+                              (0,escape_speed_multiplier*int(self.speed_level*0.5)),(escape_speed_multiplier*int(self.speed_level*-0.5),0),
+                              (escape_speed_multiplier*int(self.speed_level*-0.5),escape_speed_multiplier*int(self.speed_level*-0.5)),
+                              (escape_speed_multiplier*int(self.speed_level*0.5),escape_speed_multiplier*int(self.speed_level*0.5)),
+                              (escape_speed_multiplier*int(self.speed_level*-0.5),escape_speed_multiplier*int(self.speed_level*0.5)),
+                              (escape_speed_multiplier*int(self.speed_level*0.5),escape_speed_multiplier*int(self.speed_level*-0.5))]
+
+                random.shuffle(directions)
+
+                for (dx,dy) in directions:
+
+                    self.rect = self.rect.move(dx,dy)
+
+                    collision_in_new_path = pygame.sprite.spritecollideany(self, sprite_group_without_self, collided=None)
+
+                    if collision_in_new_path is None:
+                        self.rect = self.rect.move(-dx,-dy)
+                        (self.dx,self.dy) = (dx,dy)
+                        break
+
+                    self.rect = self.rect.move(-dx,-dy)
+
+                if collision_in_new_path is None:
+                    break
+
+                if collision_in_new_path is not None:
+                    (self.dx,self.dy) = (0,0)
+
+        return collision
+
+    def update(self):
+        # add in angles from find direction to base tower
+#        self.rect.x += self.dx
+#        self.rect.y += self.dy
+        self.rect = self.rect.move(self.dx,self.dy)
+        self.position = self.rect.center
+        
 class User_Score(object):
     def __init__(self, name, score):
         self.name = name
@@ -1270,5 +1484,4 @@ class User_Score(object):
     def __repr__(self):
         return '{}: {}'.format(self.name, self.score)
         
-    
 start_game()
