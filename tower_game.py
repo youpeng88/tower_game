@@ -893,7 +893,7 @@ class Enemies(Game_obj):
 
             collision = True
 
-            for escape_speed_multiplier in range(1,11):
+            for escape_speed_multiplier in range(1,20):
                 
                 directions = [(0,escape_speed_multiplier*int(self.speed_level*-0.5)),(escape_speed_multiplier*int(self.speed_level*0.5),0),
                               (0,escape_speed_multiplier*int(self.speed_level*0.5)),(escape_speed_multiplier*int(self.speed_level*-0.5),0),
