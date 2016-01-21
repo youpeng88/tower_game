@@ -776,23 +776,46 @@ class Knight(Game_obj):
         return collision
 
 
-    def touching_another_knight_or_tower(self, board):
+    def touching_another_knight_or_tower(self, board):        
         sprite_group_without_self = board.knights.copy()
+        
         sprite_group_without_self.remove(self)
         collision = pygame.sprite.spritecollideany(self, sprite_group_without_self, collided=None)
-        if collision is not None:
-            directions = [(0,-1),(1,0),(0,1),(-1,0)]
-            random.shuffle(directions)
-            for (dx,dy) in directions:
-                self.rect = self.rect.move(dx,dy)
-                collision_in_new_path = pygame.sprite.spritecollideany(self, sprite_group_without_self, collided=None)
-                if collision_in_new_path is None:
+
+        if collision is not None or (self.dx,self.dy) == (0,0):
+
+            collision = True
+
+            for escape_speed_multiplier in range(1,20):
+                
+                directions = [(0,escape_speed_multiplier*int(self.speed_level*-0.5)),(escape_speed_multiplier*int(self.speed_level*0.5),0),
+                              (0,escape_speed_multiplier*int(self.speed_level*0.5)),(escape_speed_multiplier*int(self.speed_level*-0.5),0),
+                              (escape_speed_multiplier*int(self.speed_level*-0.5),escape_speed_multiplier*int(self.speed_level*-0.5)),
+                              (escape_speed_multiplier*int(self.speed_level*0.5),escape_speed_multiplier*int(self.speed_level*0.5)),
+                              (escape_speed_multiplier*int(self.speed_level*-0.5),escape_speed_multiplier*int(self.speed_level*0.5)),
+                              (escape_speed_multiplier*int(self.speed_level*0.5),escape_speed_multiplier*int(self.speed_level*-0.5))]
+
+                random.shuffle(directions)
+
+                for (dx,dy) in directions:
+
+                    self.rect = self.rect.move(dx,dy)
+
+                    collision_in_new_path = pygame.sprite.spritecollideany(self, sprite_group_without_self, collided=None)
+
+                    if collision_in_new_path is None:
+                        self.rect = self.rect.move(-dx,-dy)
+                        (self.dx,self.dy) = (dx,dy)
+                        break
+
                     self.rect = self.rect.move(-dx,-dy)
-                    (self.dx,self.dy) = (dx,dy)
+
+                if collision_in_new_path is None:
                     break
-                self.rect = self.rect.move(-dx,-dy)
-                if collision_in_new_path is not None:
-                    (self.dx,self.dy) = (0,0)
+
+            if collision_in_new_path is not None:
+                (self.dx,self.dy) = (0,0)
+
         return collision
 
     def update(self):
@@ -865,26 +888,36 @@ class Enemies(Game_obj):
         sprite_group_without_self.remove(self)
         collision = pygame.sprite.spritecollideany(self, sprite_group_without_self, collided=None)
 
-        if collision is not None:
+        if collision is not None or (self.dx,self.dy) == (0,0):
 
-            directions = [(0,2*int(self.speed_level*-0.5)),(2*int(self.speed_level*0.5),0),(0,2*int(self.speed_level*0.5)),(2*int(self.speed_level*-0.5),0),
-                          (2*int(self.speed_level*-0.5),2*int(self.speed_level*-0.5)),(2*int(self.speed_level*0.5),2*int(self.speed_level*0.5)),
-                          (2*int(self.speed_level*-0.5),2*int(self.speed_level*0.5)),(2*int(self.speed_level*0.5),2*int(self.speed_level*-0.5))]
+            collision = True
 
-            random.shuffle(directions)
+            for escape_speed_multiplier in range(1,20):
+                
+                directions = [(0,escape_speed_multiplier*int(self.speed_level*-0.5)),(escape_speed_multiplier*int(self.speed_level*0.5),0),
+                              (0,escape_speed_multiplier*int(self.speed_level*0.5)),(escape_speed_multiplier*int(self.speed_level*-0.5),0),
+                              (escape_speed_multiplier*int(self.speed_level*-0.5),escape_speed_multiplier*int(self.speed_level*-0.5)),
+                              (escape_speed_multiplier*int(self.speed_level*0.5),escape_speed_multiplier*int(self.speed_level*0.5)),
+                              (escape_speed_multiplier*int(self.speed_level*-0.5),escape_speed_multiplier*int(self.speed_level*0.5)),
+                              (escape_speed_multiplier*int(self.speed_level*0.5),escape_speed_multiplier*int(self.speed_level*-0.5))]
 
-            for (dx,dy) in directions:
+                random.shuffle(directions)
 
-                self.rect = self.rect.move(dx,dy)
+                for (dx,dy) in directions:
 
-                collision_in_new_path = pygame.sprite.spritecollideany(self, sprite_group_without_self, collided=None)
+                    self.rect = self.rect.move(dx,dy)
+
+                    collision_in_new_path = pygame.sprite.spritecollideany(self, sprite_group_without_self, collided=None)
+
+                    if collision_in_new_path is None:
+                        self.rect = self.rect.move(-dx,-dy)
+                        (self.dx,self.dy) = (dx,dy)
+                        break
+
+                    self.rect = self.rect.move(-dx,-dy)
 
                 if collision_in_new_path is None:
-                    self.rect = self.rect.move(-dx,-dy)
-                    (self.dx,self.dy) = (dx,dy)
                     break
-
-                self.rect = self.rect.move(-dx,-dy)
 
                 if collision_in_new_path is not None:
                     (self.dx,self.dy) = (0,0)
