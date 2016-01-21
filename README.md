@@ -15,6 +15,7 @@
     1-19-16(6:30pm): added Instruction buttom on the start menu and merged the changes. 
     1-20-16(3:40pm): fixed input box and merged Alex's changes
     1-20-16(7:30pm): added selection button on the side bar
+     1-21-16(10:20am): Alex's and Zach's recnet changes merged (added cannon ball, improved save game feature). Fixed not saving knight number problem. 
 
 #Latest Change by Zach:
     12:41 AM: Modified Enemies.point_at_base function such that all enemies now target base
@@ -49,5 +50,5 @@
     1-20-16(3:40pm): Yoyo and Alex's recent changes merged (menu, full screen, knights added and input box)
     1-20-16(7:30pm): Yoyo's recent changes merged (added selection button on the side bar for defense units)
     1-20-16(7:34pm): Zach's recent changes merged (improved enemy self avoidance
-    
+    1-21-16(10:20am): Alex's and Zach's recnet changes merged (added cannon ball, improved save game feature)
 
