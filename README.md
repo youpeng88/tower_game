@@ -14,6 +14,7 @@
     1-19-16(5:10pm): Alex's recent changes merged (turn_based appearance) also fixed box input to make it a larger box (and some small bugs)
     1-19-16(6:30pm): added Instruction buttom on the start menu and merged the changes. 
     1-20-16(3:40pm): fixed input box and merged Alex's changes
+    1-20-16(7:30pm): added selection button on the side bar
 
 #Latest Change by Zach:
     12:41 AM: Modified Enemies.point_at_base function such that all enemies now target base
@@ -42,4 +43,6 @@
     1-19-16(5:10pm): Alex's recent changes merged (turn_based appearance, also fixed box input)
     1-19-16(6:30pm): Yoyo's recent changes merged (added instruction buttom)
     1-20-16(3:40pm): Yoyo and Alex's recent changes merged (menu, full screen, knights added and input box)
+    1-20-16(7:30pm): Yoyo's recent changes merged (added selection button on the side bar)
+    
 
