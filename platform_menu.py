@@ -57,6 +57,14 @@ Created on Tue Jan 19 12:21:14 2016
 import sys, pygame
 from menu import *
 
+black = (0, 0, 0)
+grey = (100, 100, 100)
+white = (255, 255, 255)
+green = (0, 255, 0)
+red   = (255, 0, 0)
+blue  = (0, 0, 255)
+
+
 
 ## ---[ main ]------------------------------------------------------------------
 #  This function runs the entire screen and contains the main while loop
@@ -66,6 +74,8 @@ def main(screen):
    # Create 3 diffrent menus.  One of them is only text, another one is only
    # images, and a third is -gasp- a mix of images and text buttons!  To
    # understand the input factors, see the menu file
+   screen.fill(black)
+   pygame.display.flip()
    menu = cMenu(50, 50, 20, 5, 'vertical', 100, screen,
                [('PC', 1, None),
                 ('Mac',  2, None),
