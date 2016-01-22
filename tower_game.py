@@ -258,8 +258,8 @@ def start_game():
 
 # function used to display game instruction
 def display_instructions(screen):
-    location = 1
-    fontsize = 22
+    location = -3
+    fontsize = 20
     Tower_Placement = "How to play: Click anywhere on the map area to place defenses"
     Knight_Placement = "How to play: To choose defense type, select tower or knight in side menu"
     Enemy_waves = "How enemies move: Enemies come out in batches randomly from the border of the map"
@@ -284,7 +284,7 @@ def display_high_score(screen, highscore_list):
     inputask.update_text(screen, "High Scores", location-1, 30)
     for user in highscore_list:
         location +=1
-        inputask.update_text(screen, "Top " + str(location-2) +" : "+user.name + ",  "+ str(user.score) , location,22)  
+        inputask.update_text(screen, "Top " + str(location-2) +" : "+user.name + ",  "+ str(user.score) , location,20)
         if location > 11:
             break
  
@@ -330,7 +330,7 @@ def new_game(saved_stats, highscore_archive, extension, level):
     IMAGE_DICT = image_dictionary(extension)
     
     # Starting money list corresponds to different difficulty level
-    money_v = [5000, 4000, 2500]
+    money_v = [5000, 4500, 4000]
     
     # checks if previous game stats are saved properly
     if saved_stats is not None:
@@ -607,7 +607,7 @@ def main_loop(screen, board, starting_varaibles, clock, sidebar):
              # action 2: add enemies to board
              num_border_locs = len(border)
              # defines number of demons that appear at a time
-             num_enemies = 2
+             num_enemies = random.randint(0,5)
              # enemy appears every 10 loop cycles
              if loop_number - loop_created > 10:
                  enemies_count = 0
@@ -630,7 +630,6 @@ def main_loop(screen, board, starting_varaibles, clock, sidebar):
                  if wavecount % 10 == 0:
                      HP_enemy += 10
                      HP_dragon += 10
-                     money_earned_per_enemy += 3
 
              # action 3: defense tower attacks enemy (shoot)
              for tower in board.towers:
@@ -809,7 +808,7 @@ class siderbar(): # makes a sidebar which chooses defense types, displays game i
     
     def update_text(self, message, location,obj_type): # defines info position with appropriate icon
         textSize = 20
-        font = pygame.font.Font(None, 20)
+        font = pygame.font.Font("freesansbold.ttf", 20)
         texty = 0 + textSize*6
         text = font.render(message, True, white, black)
         textRect = text.get_rect()
@@ -993,7 +992,7 @@ class Lifebar(pygame.sprite.Sprite): # class for lifebar for all game objects wi
         self.boss = boss # defines the object to which the lifebar belongs
         self.screen = screen
         # position lifebar above boss
-        self.position = (self.boss.position[0] - self.boss.dimensions[0]/2, self.boss.position[1] - 7 - self.boss.dimensions[1]/2) # lifebar is positioned directly below its boss (game object)
+        self.position = (self.boss.position[0] - self.boss.dimensions[0]/2, self.boss.position[1] - 7 - self.boss.dimensions[1]/2) # lifebar is positioned directly above its boss (game object)
         self.dimensions = (self.boss.dimensions[0],5) #lifebar is same width as its boss and 10 pixels high
         self.HP = self.boss.HP
         self.board = board
@@ -1007,12 +1006,12 @@ class Lifebar(pygame.sprite.Sprite): # class for lifebar for all game objects wi
         self.image.set_colorkey((0,0,0)) # black transparent
 
     def update_Lifebar_text(self): # displays remaining HP over initial HP above each lifebar
-        textSize = 10
-        font = pygame.font.Font(None, 12)
+        textSize = 15
+        font = pygame.font.Font("freesansbold.ttf", 12)
         textx = 0 + textSize
         text = font.render(str(self.boss.HP) + "/" + str(self.full_HP), True, white)
         textRect = text.get_rect()
-        textRect.y = self.position[1] - 8
+        textRect.y = self.position[1] - textSize
         textRect.centerx = self.boss.rect.center[0]
         self.screen.blit(text, textRect)
    

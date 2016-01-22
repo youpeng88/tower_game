@@ -34,26 +34,26 @@ def get_key():
 
 def display_box(screen, message):
   "Print a message in a box in the middle of the screen"
-  fontobject = pygame.font.Font(None,24)
+  fontobject = pygame.font.Font("freesansbold.ttf",24)
   pygame.draw.rect(screen, (0,0,0),
-                   ((screen.get_width() / 2) - 170,
-                    (screen.get_height() / 2) - 10,
-                    screen.get_width()/2+170,20), 0)
+                   ((screen.get_width() / 2) - 300,
+                    (screen.get_height() / 2),
+                    700, 44), 0)
   pygame.draw.rect(screen, (255,255,255),
-                   ((screen.get_width() / 2) - 172,
-                    (screen.get_height() / 2) - 12,
-                    304,24), 1)
+                   ((screen.get_width() / 2) - 302,
+                    (screen.get_height() / 2) - 2,
+                    700,44), 1)
   if len(message) != 0:
     screen.blit(fontobject.render(message, 1, (255,255,255)),
-                ((screen.get_width() / 2) - 170, (screen.get_height() / 2) - 10))
+                ((screen.get_width() / 2) - 300, (screen.get_height() / 2)))
   pygame.display.flip()
   
 def display(screen, message):
   "Print a message n the middle of the screen"
-  fontobject = pygame.font.Font(None,30)
+  fontobject = pygame.font.Font("freesansbold.ttf",30)
   if len(message) != 0:
       screen.blit(fontobject.render(message, 1, (255,255,255)),
-                ((screen.get_width() / 2) - 170, (screen.get_height() / 2) - 10))
+                ((screen.get_width() / 2) - 300, screen.get_height() / 2))
   pygame.display.flip()
   
 def update_text(screen, message, location, fontsize):
@@ -61,12 +61,12 @@ def update_text(screen, message, location, fontsize):
     Used to display the text on the right-hand part of the screen.
     location will be used to decide what variable to display: tower number, money, wave
     """
-    textSize = 20
-    font = pygame.font.Font(None, fontsize)
+    textSize = 40
+    font = pygame.font.Font("freesansbold.ttf", fontsize)
     texty = 0 + textSize
     text = font.render(message, True, (255,255,255), (0,0,0))
     textRect = text.get_rect()
-    textRect.centery = screen.get_height()/3 + location*texty
+    textRect.centery = screen.get_height()/5 + location*texty
     textRect.centerx = (screen.get_width() / 2)
     screen.blit(text, textRect)
     pygame.display.flip()

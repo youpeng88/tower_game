@@ -140,7 +140,7 @@ class cMenu:
                 buttonList):
       ## menu items
       self.menu_items = []                      # List of menu items
-      self.font = pygame.font.Font(None, 32)    # Font to use
+      self.font = pygame.font.Font("freesansbold.ttf", 32)    # Font to use
 
       self.x = x                                # Top left corner (of surface)
       self.y = y                                # relative to the screen/window
