@@ -1,3 +1,15 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Jan 19 14:53:39 2016
+
+"""
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Jan 19 12:21:14 2016
+
+@author: pengyou modified on example menu
+"""
+
 #! /usr/bin/python
 
 ## \file  example_simple.py
@@ -45,6 +57,14 @@
 import sys, pygame
 from menu import *
 
+black = (0, 0, 0)
+grey = (100, 100, 100)
+white = (255, 255, 255)
+green = (0, 255, 0)
+red   = (255, 0, 0)
+blue  = (0, 0, 255)
+
+
 
 ## ---[ main ]------------------------------------------------------------------
 #  This function runs the entire screen and contains the main while loop
@@ -54,13 +74,12 @@ def main(screen):
    # Create 3 diffrent menus.  One of them is only text, another one is only
    # images, and a third is -gasp- a mix of images and text buttons!  To
    # understand the input factors, see the menu file
+   screen.fill(black)
+   pygame.display.flip()
    menu = cMenu(50, 50, 20, 5, 'vertical', 100, screen,
-               [('Start Game', 1, None),
-                ('Load Game',  2, None),
-                ('Platform',   3, None),
-                ('High Scores',4, None),
-                ('Instructions',5, None),
-                ('Exit',       6, None)])
+               [('PC', 1, None),
+                ('Mac',  2, None),
+                ('Back', 3, None)])
 
    # Center the menu on the draw_surface (the entire screen here)
    menu.set_center(True, True)
@@ -100,26 +119,18 @@ def main(screen):
          if state == 0:
             rect_list, state = menu.update(e, state)
          elif state == 1:
-            print 'Start Game!'
+            print 'Platform: PC'
             state = 0
             return 1
          elif state == 2:
-            print 'Load Game!'
+            print 'Platform: Mac'
             state = 0
             return 2
-         elif state == 3:
-            print 'Platform !'
-            return 3
-         elif state == 4:
-            print 'High Scores'
-            return 4
-         elif state == 5:
-            print 'Instruction'
-            return 5
          else:
-            print 'Exit!'
-            pygame.quit()
-            sys.exit()
+            print 'Back to Main Menu'
+            state = 0
+            return 4
+            
 
       # Quit if the user presses the exit button
       if e.type == pygame.QUIT:
@@ -128,3 +139,4 @@ def main(screen):
 
       # Update the screen
       pygame.display.update(rect_list)
+
