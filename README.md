@@ -1,4 +1,12 @@
-# tower_game
+"""
+Created on Thu Jan 14 15:39:30 2016
+
+Tower Game for 6.177 MIT Final Project
+Alexander Andriatis aandriat@mit.edu
+You Peng youpeng@mit.edu
+Zachary Buras zjburas@mit.edu
+
+"""
 # Lastest Change by Yoyo:
     9.32pm: added a start menu with new game and load works (currently commented out at the end of the code to make debug easier)
     10:04pm: fixed the draw line problem, now you can see the tower laser shooting line in green. 

@@ -2,15 +2,12 @@
 """
 Created on Thu Jan 14 15:39:30 2016
 
-@author: pengyou
+Tower Game for 6.177 MIT Final Project
+Alexander Andriatis aandriat@mit.edu
+You Peng youpeng@mit.edu
+Zachary Buras zjburas@mit.edu
+
 """
-
-'''
-Thoughts for additional changes:
-    1. Starting variables can be improved, maybe make it a dictionary instead of a list
-    2. merge related varaible in to one value corresponding to the variable key
-'''
-
 import os
 import pygame
 import random
