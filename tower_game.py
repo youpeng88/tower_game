@@ -15,10 +15,20 @@ import os
 import pygame
 import random
 import math
+
+# allows for user input
 import inputask
+
+# creates pressable button object
 import PygButton
+
+# creates main menu
 from example_menu import main as menu
+
+# creates difficulty level menu
 from difficulty_menu import main as level_menu
+
+# creates platform choice menu
 from platform_menu import main as pl_menu
 
 
@@ -137,13 +147,12 @@ def getKey(user_score):
 # prompts the starting menu
 def start_menu(results):
     pygame.init()
-#   screen_resolution = pygame.display.Info()
     # sets up the menu screen
     Start_screen = pygame.display.set_mode(SCREEN_SIZE, pygame.FULLSCREEN)
     pygame.display.set_caption("Menu") # caption sets title of Window
     Start_screen.fill(black) 
     pygame.display.flip()
-    if results is None:
+    if results is 1:
         results = menu(Start_screen) # start = None, load = 2
 
     # initialize files if they don't exist
@@ -160,13 +169,14 @@ def start_menu(results):
     # load platform option
     g = open('platform.txt','r')
     os_type = g.readlines()
+    # check if platform option has been defined, if not, asks to define platform first
     try:
         extension = os_type[0]
         print extension
     except IndexError:
         results = 3 # if no platform option, prompts to the platform choice menu
 
-    if results is None: # This means user selected start game
+    if results == 1: # This means user selected start game
         Start_screen.fill(black)
         pygame.display.set_caption("Difficulty Level")
         level = level_menu(Start_screen)
@@ -175,15 +185,17 @@ def start_menu(results):
         with open('saved_state.txt','r') as f:
             saved_state = f.readlines() # need to pass this into the game to update the state
             while True:
+                # checks if there is a saved state, if yes, calls for game start
                 try:
                     test = saved_state[5]
                     new_game(saved_state,highscore_archive_list, extension, level=1)
                     return None
                 except IndexError:
                     break
+        # returns to menu if no saved game
         return 4
     
-    elif results == 3: # user selected to specify operating system
+    elif results == 3: # user selected to specify operating system to select proper image type (.bmp only works on mac, .png only o PC)
         Start_screen.fill(black)
         pygame.display.set_caption("Platform") 
         platform = pl_menu(Start_screen)
@@ -200,7 +212,7 @@ def start_menu(results):
         pygame.display.set_caption("HighScore Leaderboard")  
         events = pygame.event.get()
         event_types = [event.type for event in events]
-        # click anywhere on the screen to go back to main menu
+        # click or press anywhere on the screen to go back to main menu
         while pygame.MOUSEBUTTONDOWN not in event_types and pygame.KEYDOWN not in event_types:
             display_high_score(Start_screen, highscore_archive_list)
             events = pygame.event.get()
@@ -212,7 +224,7 @@ def start_menu(results):
         pygame.display.set_caption("Game Instruction")  
         events = pygame.event.get()
         event_types = [event.type for event in events]
-        # click anywhere on the screen to go back to main menu
+        # click or press anywhere on the screen to go back to main menu
         while pygame.MOUSEBUTTONDOWN not in event_types and pygame.KEYDOWN not in event_types:
             display_instructions(Start_screen)
             events = pygame.event.get()
@@ -222,10 +234,10 @@ def start_menu(results):
 # function to generate a new game start with menu
 def start_game():
     # call start menu 
-    level = start_menu(None)
+    level = start_menu(1)
     while level != None: # back is selected on the menu
         if level == 4:
-            level = start_menu(None) # go back to main menu page
+            level = start_menu(1) # go back to main menu page
         else: # start new game selected with a difficulty level
             #load high score
             f = open('highscores.txt','r')
@@ -235,6 +247,7 @@ def start_game():
             g = open('platform.txt','r')
             os_type = g.readlines()
             while True:
+                # checks if platform has been defined, if not, asks to select platform
                 try:
                     extension = os_type[0]
                     print extension
@@ -250,24 +263,23 @@ def start_game():
 def display_instructions(screen):
     location = 1
     fontsize = 22
-    Tower_Placement = "How to play: Click anywhere on the map area to add defense towers"
-    Enemy_waves = "How enemies move: they come out in batches randomly from the border of the map"
-    Enemy_kill = "How enemies kill: they only kill when they are next to the tower"   
-    Game_money = "How to earn gold: kill enemies to earn gold and spend gold to build towers"
-    Game_win = "How to win: kill as many enemies as possible to achieve higher score"
-    
+    Tower_Placement = "How to play: Click anywhere on the map area to place defenses"
+    Knight_Placement = "How to play: To choose defense type, select tower or knight in side menu"
+    Enemy_waves = "How enemies move: Enemies come out in batches randomly from the border of the map"
+    Enemy_kill = "How enemies kill: Enemies only kill when they are next to the tower"
+    Game_money = "How to earn gold: Kill enemies to earn gold and spend gold to build defenses"
+    Game_win = "How to win: Kill as many enemies as possible to achieve higher score"
     Enemy_grow = "Watch out! Enemies come out later with more HP and more killing power"
 
     inputask.update_text(screen, "Instructions" , location,30)
     inputask.update_text(screen,  Tower_Placement, location+2, fontsize)
-    inputask.update_text(screen,  Enemy_waves, location+4, fontsize)
-    inputask.update_text(screen,  Enemy_kill, location+6, fontsize) 
-    inputask.update_text(screen,  Game_money, location+8, fontsize)
-    inputask.update_text(screen,  Game_win, location+10, fontsize)
-    inputask.update_text(screen,  "Have Fun!!!!! But....", location+12, fontsize)
-    inputask.update_text(screen,  Enemy_grow, location+14, fontsize)
-
-    pass
+    inputask.update_text(screen, Knight_Placement, location+4, fontsize)
+    inputask.update_text(screen,  Enemy_waves, location+6, fontsize)
+    inputask.update_text(screen,  Enemy_kill, location+8, fontsize)
+    inputask.update_text(screen,  Game_money, location+10, fontsize)
+    inputask.update_text(screen,  Game_win, location+12, fontsize)
+    inputask.update_text(screen,  "Have Fun!!!!! But....", location+14, fontsize)
+    inputask.update_text(screen,  Enemy_grow, location+16, fontsize)
 
 # function used to display game highscore
 def display_high_score(screen, highscore_list):
@@ -275,9 +287,8 @@ def display_high_score(screen, highscore_list):
     inputask.update_text(screen, "High Scores", location-1, 30)
     for user in highscore_list:
         location +=1
-        #message = user[]
         inputask.update_text(screen, "Top " + str(location-2) +" : "+user.name + ",  "+ str(user.score) , location,22)  
-        if location > 12:
+        if location > 11:
             break
  
 # function used to generate high score list using user_score objects       
@@ -286,12 +297,14 @@ def convert_score_list(highscore_archive):
     if highscore_archive != []:
          for i in range(len(highscore_archive)):
              for j in range(len(highscore_archive[i])):
+                 # Reads highscore list as a name and a score
                  if highscore_archive[i][j] == "+":
                     archive_name = highscore_archive[i][0:j]
                     archive_score = int(highscore_archive[i][j+1:len(highscore_archive[i])-1])
                     highscores.append(User_Score(archive_name, archive_score))
                     highscores = sorted(highscores, key=getKey, reverse=True)
     else:
+        # Defines an empty highscore section if no previous highscores
         highscores = [User_Score("--empty--", 0),
                       User_Score("--empty--", 0),
                       User_Score("--empty--", 0),
@@ -322,11 +335,11 @@ def new_game(saved_stats, highscore_archive, extension, level):
     # Starting money list corresponds to different difficulty level
     money_v = [5000, 4000, 2500]
     
-    # checks if previoius game stats are saved properly(?)
+    # checks if previous game stats are saved properly
     if saved_stats is not None:
         while True:
             try:
-                tower_number = int(saved_stats[0])
+                test = int(saved_stats[0])
                 break
             except IndexError:
                 saved_stats = None
@@ -345,6 +358,7 @@ def new_game(saved_stats, highscore_archive, extension, level):
         knight_list = []
         dragon_list = []
         username = saved_stats[6][1:len(saved_stats[6])-1]
+        # Picks whether the lines refer to towers, enemies, kights, or dragons and saves them in separate lists
         for i in range(len(saved_stats)):
              if saved_stats[i][0] == "t":
                  for j in range(len(saved_stats[i])):
@@ -535,7 +549,7 @@ def main_loop(screen, board, starting_varaibles, clock, sidebar):
     sidebar.display_button()
     defense_mode = "tower"
     pygame.display.flip()
-        
+
     board.towers.draw(screen) # draw tower Sprite
     pygame.display.flip()
     
@@ -549,20 +563,20 @@ def main_loop(screen, board, starting_varaibles, clock, sidebar):
     mainloop = True
     loop_number = 0
     loop_created = 0
-    money_earned = 0   
-    
+    money_earned = 0
+
     while mainloop == True: # when game is not over and highscore is not checked
-        while pygame.QUIT not in event_types and gameover is not True: # when use didn't click exit on the window    
-            
+        while pygame.QUIT not in event_types and gameover is not True: # when use didn't click exit on the window
+
             # check if defense_mode has changed and display in button
              for event in events:
-                 if 'click' in sidebar.button_list["tower"].handleEvent(event):                         
+                 if 'click' in sidebar.button_list["tower"].handleEvent(event):
                      sidebar.display_button()
                      defense_mode = "tower"
-                 if 'click' in sidebar.button_list["knight"].handleEvent(event): 
+                 if 'click' in sidebar.button_list["knight"].handleEvent(event):
                      sidebar.display_button()
-                     defense_mode = "knight" 
-                     
+                     defense_mode = "knight"
+
             # sets the button display mode based on defense_mode correctly
              if defense_mode == "tower":
                  sidebar.button_list["tower"].buttonDown = True
@@ -570,7 +584,7 @@ def main_loop(screen, board, starting_varaibles, clock, sidebar):
              else:
                  sidebar.button_list["tower"].buttonDown = False
                  sidebar.button_list["knight"].buttonDown = True
-                 
+
              # action 1: add tower when defese mode is tower
              if defense_mode == "tower" and pygame.MOUSEBUTTONDOWN in event_types:
                  if money >= tower_cost:
@@ -592,13 +606,16 @@ def main_loop(screen, board, starting_varaibles, clock, sidebar):
                          board.towers.draw(screen)
                          money -= knight_cost
                          knight_number +=1
-    
-             #Updated Action 2 and 5 (move)
+
+             # action 2: add enemies to board
              num_border_locs = len(border)
+             # defines number of demons that appear at a time
              num_enemies = 2
+             # enemy appears every 10 loop cycles
              if loop_number - loop_created > 10:
                  enemies_count = 0
                  while enemies_count < num_enemies:
+                     # makes enemies appear randomly from a position on the map border
                      index = random.randint(0,num_border_locs-1)
                      x,y = border[index]
                      time = pygame.time.get_ticks()
@@ -612,17 +629,16 @@ def main_loop(screen, board, starting_varaibles, clock, sidebar):
                      enemies_count +=1
                  loop_created = loop_number
                  wavecount +=1
-            # Increase enemy HP by 10 and amount of money earned by 5 every 10 waves 
-                 if wavecount % 10 == 0: 
+            # Increase enemy HP by 10 and amount of money earned by 5 every 10 waves
+                 if wavecount % 10 == 0:
                      HP_enemy += 10
                      HP_dragon += 10
-                     money_earned_per_enemy += 5                 
-             
-             # action 3: defense attacks enemy (shoot)
+                     money_earned_per_enemy += 3
+
+             # action 3: defense tower attacks enemy (shoot)
              for tower in board.towers:
                  tower.attack()
-
-             # knight attacks enemy (contact)
+             # action 3: knight attacks demon (contact)
              for knight in board.knights:
                  collision = knight.touching_enemy(board)
                  if collision is not None:
@@ -634,8 +650,9 @@ def main_loop(screen, board, starting_varaibles, clock, sidebar):
                          knight.point_at_enemy(board)
                  if money_earned != None:
                      money += money_earned
+                     score += money_earned*difficulty
 
-             # action 4: enemy attack defense and base tower
+             # action 4: demon attacks defense and base tower
              for enemy in board.enemies:
                  collision = enemy.touching_defense_or_base_tower_or_knight(board)
                  if collision is not None:
@@ -647,7 +664,7 @@ def main_loop(screen, board, starting_varaibles, clock, sidebar):
                          break
                  else:
                      collision_with_another_enemy = enemy.touching_another_enemy(board)
-    
+
                      if collision_with_another_enemy is None:
                          enemy.point_at_base(board)
 
@@ -663,11 +680,11 @@ def main_loop(screen, board, starting_varaibles, clock, sidebar):
                          break
                  else:
                      collision_with_another_dragon = dragon.touching_another_dragon(board)
-        
+
                      if collision_with_another_dragon is None:
                          dragon.point_at_tower(board)
-                         
-            # shoot cannonballs at enemies
+
+            # action 5: shoot cannonballs at enemies
              for cannonball in board.cannonballs:
                 money_earned = cannonball.attack(board)
                 if money_earned:
@@ -677,7 +694,7 @@ def main_loop(screen, board, starting_varaibles, clock, sidebar):
             # update sidebar, towers, enemies, knights, dragons and all other sprite objects
              sidebar.display_text(tower_number,knight_number, money, wavecount,difficulty,score)
              sidebar.display_button()
-             
+
              screen.blit(BackGround.image, BackGround.rect)
 
              board.towers.update()
@@ -692,21 +709,15 @@ def main_loop(screen, board, starting_varaibles, clock, sidebar):
              board.enemies.draw(screen)
              board.knights.draw(screen)
              board.dragons.draw(screen)
-             
-             # display            
+
+             # redraw display
              pygame.display.flip()
-             
+
              # update event list
              events = pygame.event.get()
              event_types = [event.type for event in events] # update event list
-             
-             # provide game pause choice and goes back to main menu
-             for event in events:
-                 if event.type == pygame.KEYDOWN:
-                     if event.key == pygame.K_ESCAPE or event.key == pygame.K_BACKSPACE:
-                         gameover = True
-                         print "Paused Game"
 
+             # provide game pause choice and goes back to main menu
              for event in events:
                  if event.type == pygame.KEYDOWN:
                      if event.key == pygame.K_ESCAPE or event.key == pygame.K_BACKSPACE:
@@ -741,7 +752,7 @@ def main_loop(screen, board, starting_varaibles, clock, sidebar):
                 # display the leaderboard for about 3 seconds and then go back to main menu
                 pygame.display.set_caption("HighScore Leaderboard")  
                 display_high_score(Highscore_screen, highscores)
-                pygame.time.wait(3000)
+                pygame.time.wait(2000)
                 break
         
         # only saves the top 10 high scores
@@ -777,16 +788,16 @@ def main_loop(screen, board, starting_varaibles, clock, sidebar):
                 f.write("k"+str(knight.position)+"+"+str(knight.time) + "\n")
             for dragon in board.dragons:
                 f.write("d"+str(dragon.position)+"+"+str(dragon.time) + "\n")
-                
+
+        # save highscores
         with open('highscores.txt','w') as f:
             for user in range(len(highscores)):
                 f.write(str(highscores[user].name)+"+"+str(highscores[user].score) + "\n")
-            f.close()
 
     # goes back to main menu when mainloop = False
     start_game()
     
-class Background(pygame.sprite.Sprite):
+class Background(pygame.sprite.Sprite): # defines the map background
     def __init__(self, obj_type, position):
         pygame.sprite.Sprite.__init__(self)  #call Sprite initializer
         self.image = pygame.image.load(IMAGE_DICT[obj_type][0])
@@ -794,16 +805,12 @@ class Background(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.left, self.rect.top = position
         
-class siderbar():
+class siderbar(): # makes a sidebar which chooses defense types, displays game info
     def __init__(self,screen):
         self.screen = screen
         self.button_list = {}
     
-    def update_text(self, message, location,obj_type):
-        """
-        Used to display the text on the right-hand part of the screen.
-        location will be used to decide what variable to display: tower number, money, wave
-        """
+    def update_text(self, message, location,obj_type): # defines info position with appropriate icon
         textSize = 20
         font = pygame.font.Font(None, 20)
         texty = 0 + textSize*6
@@ -815,22 +822,22 @@ class siderbar():
         icon = Background(obj_type, [textRect.x - 20, textRect.y])
         self.screen.blit(icon.image, icon.rect) 
     
-    def add_button(self, obj_type1, obj_type2, location):
+    def add_button(self, obj_type1, obj_type2, location): # creates selection button for defense types
         button_rect = pygame.Rect(SCREEN_SIZE[0]-BAR_SIZE[0]*3/4+70*location[0],MARGIN + 30*location[1], BAR_SIZE[0]/5, 40)
-        my_Button = PygButton.PygButton(button_rect,'lala',bgcolor=white,fgcolor=red)
+        my_Button = PygButton.PygButton(button_rect,'',bgcolor=white,fgcolor=red)
         my_Button.setSurfaces(IMAGE_DICT[obj_type1][0],IMAGE_DICT[obj_type2][0],IMAGE_DICT[obj_type1][0]) # set tower picture as button        
         self.button_list[obj_type1] = my_Button
         
-    def update_button(self,event):
+    def update_button(self,event): # changes button status depending on defense selection
         for my_Button in self.button_list.values():
             my_Button.handleEvent(event)
     
-    def display_button(self):
+    def display_button(self): # redraws the button when status changes
         for my_Button in self.button_list.values():
             my_Button._visible = True
             my_Button.draw(self.screen)
     
-    def display_text(self, tower_number,knight_number, money, wavecount,level,score):
+    def display_text(self, tower_number,knight_number, money, wavecount,level,score): # defines and draws game info
         self.screen.fill(black)
         self.update_text("Tower #: " + str(tower_number) + "  Knight #: " + str(knight_number), 1, "tower_icon")
         self.update_text("Money: " + str(money), 2, "gold_icon")
@@ -845,7 +852,7 @@ class siderbar():
             self.update_text("Difficulty Level: Hard", 5, "level") 
 
 
-class Board:
+class Board: # class to track of all the game objects. ues dictionaries and sprite groups.
     def __init__(self, HP_base,screen,defense_range, attack_power):
 
         self.screen = screen
@@ -854,19 +861,18 @@ class Board:
         init_x = MARGIN+MAP_SIZE[0]/2
         init_y = MARGIN+MAP_SIZE[1]/2
         time = 0
-        
         self.base_tower = Tower(self, time, (init_x, init_y), "base_tower", HP_base, defense_range, attack_power, 0)
         self.base_tower_lifebar = Lifebar(self, time, self.base_tower,screen, HP_base)
 
-        # Initialize the tower dic
+        # Initialize the tower dictionary
         self.tower_dict = {}
         self.tower_dict[0] = self.base_tower
 
-        # Create life bar dict and Sprite group
+        # Create life bar dictionary and Sprite group
         self.lifebar_dict = {}
         self.lifebars = pygame.sprite.Group()
 
-        # Add base tower lifebar to lifebar dict and Sprite group
+        # Add base tower lifebar to lifebar dictionary and Sprite group
         self.lifebar_dict[0] = self.base_tower_lifebar
         self.lifebars.add(self.base_tower_lifebar)
         
@@ -874,27 +880,29 @@ class Board:
         self.towers = pygame.sprite.Group()
         self.towers.add(self.base_tower)
 
-        # Create enemy dict and Sprite group
+        # Create enemy dictionary and Sprite group
         self.enemy_dict = {}
         self.enemies = pygame.sprite.Group()
 
-        # Create knight dict and Sprite group
+        # Create knight dictionary and Sprite group
         self.knight_dict = {}
         self.knights = pygame.sprite.Group()
 
-        # Create cannonball dict and Sprite group
+        # Create cannonball dictionary and Sprite group
         self.cannonball_dict = {}
         self.cannonballs = pygame.sprite.Group()
 
-        # Create dragon dict and Sprite group
+        # Create dragon dictionary and Sprite group
         self.dragon_dict = {}
         self.dragons = pygame.sprite.Group()
         
     def add_tower_to_board(self, time, position, HP_tower,defense_range, attack_power, tower_reload_time):
         defense_tower = Tower(self, time, position, "defense_tower", HP_tower, defense_range, attack_power, tower_reload_time)
+        # checks if tower placement is inside the map boundary
         if defense_tower.rect.x < MARGIN or defense_tower.rect.topright[0] > MARGIN + MAP_SIZE[0] or defense_tower.rect.y < MARGIN or defense_tower.rect.bottomleft[1] > MARGIN + MAP_SIZE[1]:
             return False
         else:
+            # checks if tower placement interferes with position of other game objects
             collision_tower = pygame.sprite.spritecollideany(defense_tower, self.towers, None)
             collision_enemy = pygame.sprite.spritecollideany(defense_tower, self.enemies, None)
             collision_knight = pygame.sprite.spritecollideany(defense_tower, self.knights, None)
@@ -911,6 +919,7 @@ class Board:
 
     def add_enemy_to_board(self, time, position, speed_level, HP_enemy, attack_power, money_earned_per_enemy):
         enemy = Enemies(self, time, position, "enemy", HP_enemy, speed_level, attack_power, money_earned_per_enemy)
+        # checks that enemy appearance does not interfere with existing game objects
         collision_tower = pygame.sprite.spritecollideany(enemy, self.towers, None)
         collision_enemy = pygame.sprite.spritecollideany(enemy, self.enemies, None)
         collision_knight = pygame.sprite.spritecollideany(enemy, self.knights, None)
@@ -919,15 +928,17 @@ class Board:
             self.enemies.add(enemy)
             enemy_lifebar = Lifebar(self, time, enemy, self.screen, HP_enemy)
 
-            # Add defense tower lifebar to lifebar dict and Sprite group
+            # Add enemy lifebar to lifebar dict and Sprite group
             self.lifebar_dict[time] = enemy_lifebar
             self.lifebars.add(enemy_lifebar)
 
     def add_knight_to_board(self, time, position, HP_knight, attack_power):
         knight = Knight(self, time, position, "knight", HP_knight, attack_power)
+        # checks that knight is placed inside board
         if knight.rect.x < MARGIN or knight.rect.topright[0] > MARGIN + MAP_SIZE[0] or knight.rect.y < MARGIN or knight.rect.bottomleft[1] > MARGIN + MAP_SIZE[1]:
             return False
         else:
+            # checks that knight placement does not interfere with existing game objects
             collision_tower = pygame.sprite.spritecollideany(knight, self.towers, None)
             collision_enemy = pygame.sprite.spritecollideany(knight, self.enemies, None)
             collision_knight = pygame.sprite.spritecollideany(knight, self.knights, None)
@@ -943,6 +954,7 @@ class Board:
                 
     def add_dragon_to_board(self, time, position, speed_level, HP_dragon, attack_power, money_earned_per_enemy):
         dragon = Dragons(self, time, position, "dragon", HP_dragon, speed_level, attack_power, money_earned_per_enemy)
+        # checks that dragon placement does not interfere with tower or another dragon, ignores enemies and knights
         collision_tower = pygame.sprite.spritecollideany(dragon, self.towers, None)
         collision_dragon = pygame.sprite.spritecollideany(dragon, self.dragons, None)
         if collision_tower is None and collision_dragon is None:
@@ -950,7 +962,7 @@ class Board:
             self.dragons.add(dragon)
             dragon_lifebar = Lifebar(self, time, dragon, self.screen, HP_dragon)
 
-            # Add defense tower lifebar to lifebar dict and Sprite group
+            # Add dragon lifebar to lifebar dict and Sprite group
             self.lifebar_dict[time] = dragon_lifebar
             self.lifebars.add(dragon_lifebar)
     
@@ -960,6 +972,8 @@ class Board:
         self.cannonballs.add(cannonball)
        
 class Game_obj(pygame.sprite.Sprite):
+    # a general class for objects on board with shared properties
+    # superclass for enemies, towers, knights, dragons, cannonballs
     def __init__(self, board, time, position, obj_type, init_HP, attack_power):
         pygame.sprite.Sprite.__init__(self)
         self.time = time
@@ -967,18 +981,21 @@ class Game_obj(pygame.sprite.Sprite):
         self.position = position
         self.dimensions = IMAGE_DICT[obj_type][1]
         self.HP = init_HP
+        self.attack_power = attack_power
+
+        # chooses appropriate image from image dictionary based on object type
         self.image = pygame.image.load(IMAGE_DICT[obj_type][0]).convert_alpha()
         self.image = pygame.transform.scale(self.image, IMAGE_DICT[obj_type][1])
         self.rect = self.image.get_rect()
         self.rect.center = position
-        self.attack_power = attack_power
 
-class Lifebar(pygame.sprite.Sprite):
+class Lifebar(pygame.sprite.Sprite): # class for lifebar for all game objects with variable HP
     def __init__(self, time, board, boss, screen, full_HP):
         pygame.sprite.Sprite.__init__(self)
         self.time = time
-        self.boss = boss
+        self.boss = boss # defines the object to which the lifebar belongs
         self.screen = screen
+        # position lifebar above boss
         self.position = (self.boss.position[0] - self.boss.dimensions[0]/2, self.boss.position[1] - 7 - self.boss.dimensions[1]/2) # lifebar is positioned directly below its boss (game object)
         self.dimensions = (self.boss.dimensions[0],5) #lifebar is same width as its boss and 10 pixels high
         self.HP = self.boss.HP
@@ -992,7 +1009,7 @@ class Lifebar(pygame.sprite.Sprite):
         self.image = pygame.Surface(self.dimensions)
         self.image.set_colorkey((0,0,0)) # black transparent
 
-    def update_Lifebar_text(self):
+    def update_Lifebar_text(self): # displays remaining HP over initial HP above each lifebar
         textSize = 10
         font = pygame.font.Font(None, 12)
         textx = 0 + textSize
@@ -1002,8 +1019,7 @@ class Lifebar(pygame.sprite.Sprite):
         textRect.centerx = self.boss.rect.center[0]
         self.screen.blit(text, textRect)
    
-    def update(self):
-
+    def update(self):  # update position and amount of lifebar filled based on HP remaining
         self.position = (self.boss.rect.center[0] - self.boss.dimensions[0]/2, self.boss.rect.center[1] - 7 - self.boss.dimensions[1]/2)
         self.frac = float(self.boss.HP) / float(self.full_HP)
         pygame.draw.rect(self.screen, (0,0,0), (self.position,self.dimensions)) # fill black
@@ -1011,36 +1027,34 @@ class Lifebar(pygame.sprite.Sprite):
 
         self.update_Lifebar_text()
             
-class Tower(Game_obj):
+class Tower(Game_obj): # class for towers, an immobile defense type
     def __init__(self, board, time, position, obj_type, init_HP, defense_range, attack_power, reload_time):
         super(Tower, self).__init__(board, time, position, obj_type, init_HP, attack_power)
-        self.defense_range = defense_range
+        self.defense_range = defense_range # how far the tower can shoot
         self.previous_time = 0
-        self.reload_time = reload_time
+        self.reload_time = reload_time # time between shots
     
-    def attack(self):
-        attack_enemy = self.closest_enemy()
+    def attack(self): # attacks enemies in the vicinity of tower
+        attack_enemy = self.closest_enemy() # finds closest enemy
         time = pygame.time.get_ticks()
         passed_time = time - self.previous_time
         if passed_time > self.reload_time:
-            if attack_enemy != None:
+            if attack_enemy != None: # if an enemy within range can be attacked
                 self.board.add_cannonball_to_board(time, self.position, 10, self.attack_power, self)
                 self.previous_time = time
 
-    def death(self, board):
-        # need to remove the object from the board
-        # from dic list
+    def death(self, board): # in event that tower is killed by enemies removes tower from the dictionary and spritegroup
+        # used to associate tower with corresponding lifebar
         time = self.time
-        board.tower_dict[time] = None
         lifebar = board.lifebar_dict[time]
-        lifebar.kill()
+        # removes the tower and lifebar from dictionaries
+        board.tower_dict[time] = None
         board.lifebar_dict[time] = None
-
+        # removes tower and lifebar from sprite groups they are in
+        lifebar.kill()
         self.kill()
-        self.update()
-        lifebar.update()
 
-    def closest_enemy(self):
+    def closest_enemy(self): # finds closest enemy
         e_position = None
         final_enemy = None
         closest_distance = self.defense_range
@@ -1060,38 +1074,41 @@ class Tower(Game_obj):
             return final_enemy
 
 
-class Cannonball(Game_obj):
+class Cannonball(Game_obj): # class for projectiles shot by towers
     def __init__(self, board, time, position, obj_type, init_HP, attack_power, tower):
         super(Cannonball,self).__init__(board, time, position, obj_type, init_HP, attack_power)
-        self.tower = tower
+        self.tower = tower # defines tower associated with cannonball
         self.closest_enemy = tower.closest_enemy()
-        self.previous_enemy = self.closest_enemy
-        self.speed_level = 10
-        self.orientation = (0.0, 1.0) #points up initially
+        self.speed_level = 10 # speed of cannonball travel
         self.dx = 0
         self.dy = 0
         self.point_at_enemy(board)
 
-    def attack(self, board):
-        collision = self.touching_enemy(board)
+    def attack(self, board): # attacks enemies along direction of travel, defined by the tower's attack
+        collision = self.touching_enemy(board) # finds if cannonball is hitting an enemy
+
+        # checks to see if cannonball is on the map, removes it if not
         if self.rect.x < MARGIN or self.rect.topright[0] > MARGIN + MAP_SIZE[0] or self.rect.y < MARGIN or self.rect.bottomleft[1] > MARGIN + MAP_SIZE[1]:
                 self.death(board)
+        # if cannonball hits an enemy, reduces enemy HP and destroys itself
         elif collision is not None:
             collision.HP -= self.attack_power
             self.death(board)
+            # enemy dies if its HP falls to 0
             if collision.HP <= 0:
                 return collision.death(board)
+        # if cannonball is stuck delete it
         elif self.dx == 0 and self.dy == 0:
             self.death(board)
+        # if cannonball is outside defense range, delete it
         elif calc_distance(self.position, self.tower.position) > self.tower.defense_range:
             self.death(board)
-        elif self.closest_enemy.living == False:
-            pass
+        # if none apply, cannonball keeps flying
         else:
-            self.point_at_enemy(board)
+            pass
         return False
 
-    def point_at_enemy(self, board): # moving direction
+    def point_at_enemy(self, board): # calculates direction in which to move to reach enemy at its location at time of fire
         enemy = self.closest_enemy
         if enemy is not None:
             direction = (float(enemy.position[0] - self.position[0]), float(enemy.position[1] - self.position[1]))
@@ -1100,12 +1117,11 @@ class Cannonball(Game_obj):
                 new_orientation = (direction[0]/distance, direction[1]/distance)
                 self.dx = int(self.speed_level*(new_orientation[0]))
                 self.dy = int(self.speed_level*(new_orientation[1]))
-                self.orientation = new_orientation
             else:
                 self.dx = 0
                 self.dy = 0
 
-    def touching_enemy(self, board):
+    def touching_enemy(self, board): # finds enemies that the cannonball is touching
         collision_enemy = pygame.sprite.spritecollideany(self, board.enemies, collided=None)
         collision_dragon = pygame.sprite.spritecollideany(self, board.dragons, collided=None)
         if collision_dragon is not None:
@@ -1115,73 +1131,60 @@ class Cannonball(Game_obj):
         else:
             return None
 
-    def death(self, board):
+    def death(self, board): # removes the cannonball
         time = self.time
         board.cannonball_dict[time] = None
         self.kill()
-        self.update()
 
-    def update(self):
+    def update(self): # moves the cannonball
         self.rect = self.rect.move(self.dx,self.dy)
         self.position = self.rect.center
 
-class Knight(Game_obj):
+class Knight(Game_obj): # class for knights, a mobile defense type
     def __init__(self, board, time, position, obj_type, init_HP, attack_power):
         super(Knight,self).__init__(board, time, position, obj_type, init_HP, attack_power)
-        self.orientation = (0.0, 1.0) #points up initially
         self.speed_level = 2
         self.dx = 0
         self.dy = 0
         self.point_at_enemy(board)
 
-    def point_at_enemy(self, board): # moving direction
+    def point_at_enemy(self, board): # finds closest enemy and moves towards it
         enemy = self.closest_enemy()
         if enemy is not None:
             direction = (float(enemy.position[0] - self.position[0]), float(enemy.position[1] - self.position[1]))
             distance = calc_distance(self.position, enemy.position)
             new_orientation = (direction[0]/distance, direction[1]/distance)
-            # knights have to rotate too much
-            # rotate_angle = angle(new_orientation, self.orientation)
-            # if rotate_angle > 1:
-            #     self.image = pygame.transform.rotate(self.image, rotate_angle)
             self.dx = int(self.speed_level*(new_orientation[0]))
             self.dy = int(self.speed_level*(new_orientation[1]))
-            self.orientation = new_orientation
 
-    def closest_enemy(self):
-        e_position = None
+    def closest_enemy(self): # defines how to find the closest enemy
         final_enemy = None
         closest_distance = MAP_SIZE[1]
         for enemy in self.board.enemies:
             distance = calc_distance(self.position, enemy.position)
             if distance < closest_distance:
                 closest_distance = distance
-                e_position = enemy.position
                 final_enemy = enemy
-        if e_position != None:
-            return final_enemy
-        return False
+        return final_enemy
 
-    def attack(self, collision, board):
+    def attack(self, collision, board): # if knight contacts enemy, decreases the enemy HP
         collision.HP -= self.attack_power
-        if collision.HP <= 0:
+        if collision.HP <= 0: # if enemy HP is zero, enemy dies
             return collision.death(board)
         return None
 
-    def death(self, board):
-        # need to remove the object from the board
-        # from dic list
+    def death(self, board): # if knight HP is zero, knight dies
+        # used to associate knight with corresponding lifebar
         time = self.time
-        board.enemy_dict[time] = None
         lifebar = board.lifebar_dict[time]
-        lifebar.kill()
+        # removes the knight and lifebar from dictionaries
+        board.knight_dict[time] = None
         board.lifebar_dict[time] = None
+        # removes knight and lifebar from sprite groups they are in
+        lifebar.kill()
         self.kill()
-        self.update()
-        lifebar.update()
-        return True
 
-    def touching_enemy(self, board):
+    def touching_enemy(self, board): # determines if knight touches enemy, and stops knight if it is
         collision = pygame.sprite.spritecollideany(self, board.enemies, collided=None)
         if collision is not None:
             self.dx = 0
@@ -1189,57 +1192,52 @@ class Knight(Game_obj):
         return collision
 
 
-    def touching_another_knight_or_tower(self, board):        
-        sprite_group_without_self = board.knights.copy()
-        
+    def touching_another_knight_or_tower(self, board): # if knight collides with another knight or tower, tries moving in a different direction to avoid contact
+        sprite_group_without_self = board.knights.copy() # duplicates its group, excluding itself
         sprite_group_without_self.remove(self)
-        collision = pygame.sprite.spritecollideany(self, sprite_group_without_self, collided=None)
 
+        collision = pygame.sprite.spritecollideany(self, sprite_group_without_self, collided=None) # checks if it collides with other knights
         if collision is not None or (self.dx,self.dy) == (0,0):
-
             collision = True
-
+            # picks from 8 different directions in a certain range to find the closest possible movement that lets it escape collision
             for escape_speed_multiplier in range(1,20):
-                
                 directions = [(0,escape_speed_multiplier*int(self.speed_level*-0.5)),(escape_speed_multiplier*int(self.speed_level*0.5),0),
                               (0,escape_speed_multiplier*int(self.speed_level*0.5)),(escape_speed_multiplier*int(self.speed_level*-0.5),0),
                               (escape_speed_multiplier*int(self.speed_level*-0.5),escape_speed_multiplier*int(self.speed_level*-0.5)),
                               (escape_speed_multiplier*int(self.speed_level*0.5),escape_speed_multiplier*int(self.speed_level*0.5)),
                               (escape_speed_multiplier*int(self.speed_level*-0.5),escape_speed_multiplier*int(self.speed_level*0.5)),
                               (escape_speed_multiplier*int(self.speed_level*0.5),escape_speed_multiplier*int(self.speed_level*-0.5))]
+                random.shuffle(directions) # randomises the directions that are attempted for escape
 
-                random.shuffle(directions)
-
-                for (dx,dy) in directions:
-
+                for (dx,dy) in directions: # tests moving in the direction chosen
                     self.rect = self.rect.move(dx,dy)
-
                     collision_in_new_path = pygame.sprite.spritecollideany(self, sprite_group_without_self, collided=None)
-
-                    if collision_in_new_path is None:
-                        self.rect = self.rect.move(-dx,-dy)
-                        (self.dx,self.dy) = (dx,dy)
+                    if collision_in_new_path is None: # if there is no collision in the direction chosen
+                        self.rect = self.rect.move(-dx,-dy) # move back to original position, to be moved later on
+                        (self.dx,self.dy) = (dx,dy) # define new direction which will avoid collision
                         break
 
-                    self.rect = self.rect.move(-dx,-dy)
+                    self.rect = self.rect.move(-dx,-dy) # if the direction chosen also has a collision, move back to original position
 
-                if collision_in_new_path is None:
+                if collision_in_new_path is None: # breaks out of the outer loop if a suitable direction is found
                     break
 
-            if collision_in_new_path is not None:
+            if collision_in_new_path is not None: # if there is no movement within 20 pixels that produces no collision, stays at rest
                 (self.dx,self.dy) = (0,0)
 
         return collision
 
-    def update(self):
-        # add in angles from find direction to base tower
+    def update(self): # moves the knight
         self.rect = self.rect.move(self.dx,self.dy)
+        # if knight is outside of the board, it is removed
+        if self.rect.x < MARGIN or self.rect.topright[0] > MARGIN + MAP_SIZE[0] or self.rect.y < MARGIN or self.rect.bottomleft[1] > MARGIN + MAP_SIZE[1]:
+            self.death(self.board)
         self.position = self.rect.center
 
 class Enemies(Game_obj):
     def __init__(self, board, time, position, obj_type, init_HP, level, attack_power, money_earned_per_enemy):
         super(Enemies,self).__init__(board, time, position, obj_type, init_HP, attack_power)
-        self.orientation = (0.0, 1.0) #points up initially
+        self.orientation = (0.0, 1.0) #points down initially
         self.speed_level = 2*level
         self.dx = 0
         self.dy = 0
@@ -1247,40 +1245,38 @@ class Enemies(Game_obj):
         self.money_earned_per_enemy = money_earned_per_enemy
         self.living = True
 
-    def point_at_base(self, board): # moving direction
+    def point_at_base(self, board): # points at base tower and finds the direction to move towards it
         direction = (float(board.base_tower.position[0] - self.position[0]), float(board.base_tower.position[1] - self.position[1]))
         distance = calc_distance(self.position, board.base_tower.position)
         new_orientation = (direction[0]/distance, direction[1]/distance)
+        # rotates the enemy to point towards the central tower
         rotate_angle = angle(new_orientation, self.orientation)
-        if rotate_angle > 5:
+        if rotate_angle > 5: # prevents excessive rotation which can cause glitches
             self.image = pygame.transform.rotate(self.image, rotate_angle)
+        # sets movement amount
         self.dx = int(self.speed_level*(new_orientation[0]))
         self.dy = int(self.speed_level*(new_orientation[1]))
         self.orientation = new_orientation
-        
-    def set_new_speed(self,new_level):
-        self.speed_level = 1*new_level
 
-    def attack(self, collision, board):
+    def attack(self, collision, board): # if enemy collides with a tower or knight, decrease the defense HP
         collision.HP -= self.attack_power
-        if collision.HP <= 0:
+        if collision.HP <= 0: # if defense HP reduced to zero, removes defense
             collision.death(board)
 
-    def death(self, board):
-        # need to remove the object from the board
-        # from dic list
+    def death(self, board): # removes the enemy if it dies
+        # used to associate enemy with corresponding lifebar
         time = self.time
         self.living = False
-        board.enemy_dict[time] = None
         lifebar = board.lifebar_dict[time]
-        lifebar.kill()
+        # removes the enemy and lifebar from dictionaries
+        board.enemy_dict[time] = None
         board.lifebar_dict[time] = None
+        # removes enemy and lifebar from sprite groups they are in
+        lifebar.kill()
         self.kill()
-        self.update()
-        lifebar.update()
         return self.money_earned_per_enemy
         
-    def touching_defense_or_base_tower_or_knight(self, board):
+    def touching_defense_or_base_tower_or_knight(self, board): # finds if the enemy has hit a defense unit, stops if true
         collision_tower = pygame.sprite.spritecollideany(self, board.towers, collided=None)
         if collision_tower is not None:
             self.dx = 0
@@ -1293,59 +1289,49 @@ class Enemies(Game_obj):
             return collision_knight
         return None
 
-    def touching_another_enemy(self, board):
+    def touching_another_enemy(self, board): # finds if the enemy is hitting another enemy, tries to escape
         sprite_group_without_self = board.enemies.copy()
-        
         sprite_group_without_self.remove(self)
-        collision = pygame.sprite.spritecollideany(self, sprite_group_without_self, collided=None)
 
+        collision = pygame.sprite.spritecollideany(self, sprite_group_without_self, collided=None) # checks if it collides with other knights
         if collision is not None or (self.dx,self.dy) == (0,0):
-
             collision = True
-
+            # picks from 8 different directions in a certain range to find the closest possible movement that lets it escape collision
             for escape_speed_multiplier in range(1,20):
-                
                 directions = [(0,escape_speed_multiplier*int(self.speed_level*-0.5)),(escape_speed_multiplier*int(self.speed_level*0.5),0),
                               (0,escape_speed_multiplier*int(self.speed_level*0.5)),(escape_speed_multiplier*int(self.speed_level*-0.5),0),
                               (escape_speed_multiplier*int(self.speed_level*-0.5),escape_speed_multiplier*int(self.speed_level*-0.5)),
                               (escape_speed_multiplier*int(self.speed_level*0.5),escape_speed_multiplier*int(self.speed_level*0.5)),
                               (escape_speed_multiplier*int(self.speed_level*-0.5),escape_speed_multiplier*int(self.speed_level*0.5)),
                               (escape_speed_multiplier*int(self.speed_level*0.5),escape_speed_multiplier*int(self.speed_level*-0.5))]
+                random.shuffle(directions) # randomises the directions that are attempted for escape
 
-                random.shuffle(directions)
-
-                for (dx,dy) in directions:
-
+                for (dx,dy) in directions: # tests moving in the direction chosen
                     self.rect = self.rect.move(dx,dy)
-
                     collision_in_new_path = pygame.sprite.spritecollideany(self, sprite_group_without_self, collided=None)
-
-                    if collision_in_new_path is None:
-                        self.rect = self.rect.move(-dx,-dy)
-                        (self.dx,self.dy) = (dx,dy)
+                    if collision_in_new_path is None: # if there is no collision in the direction chosen
+                        self.rect = self.rect.move(-dx,-dy) # move back to original position, to be moved later on
+                        (self.dx,self.dy) = (dx,dy) # define new direction which will avoid collision
                         break
 
-                    self.rect = self.rect.move(-dx,-dy)
+                    self.rect = self.rect.move(-dx,-dy) # if the direction chosen also has a collision, move back to original position
 
-                if collision_in_new_path is None:
+                if collision_in_new_path is None: # breaks out of the outer loop if a suitable direction is found
                     break
 
-                if collision_in_new_path is not None:
-                    (self.dx,self.dy) = (0,0)
+            if collision_in_new_path is not None: # if there is no movement within 20 pixels that produces no collision, stays at rest
+                (self.dx,self.dy) = (0,0)
 
         return collision
 
-    def update(self):
-        # add in angles from find direction to base tower
-#        self.rect.x += self.dx
-#        self.rect.y += self.dy
+    def update(self): # moves the enemy
         self.rect = self.rect.move(self.dx,self.dy)
         self.position = self.rect.center
 
-class Dragons(Game_obj):
+class Dragons(Game_obj): # enemy type which can fly over knights and ground enemies and only attacks towers
     def __init__(self, board, time, position, obj_type, init_HP, level, attack_power, money_earned_per_enemy):
         super(Dragons,self).__init__(board, time, position, obj_type, init_HP, attack_power)
-        self.orientation = (0.0, 1.0) #points up initially
+        self.orientation = (0.0, 1.0) #points down initially
         self.speed_level = 2*2*level #Dragons are twice as fast as other enemies
         self.dx = 0
         self.dy = 0
@@ -1353,14 +1339,15 @@ class Dragons(Game_obj):
         self.money_earned_per_enemy = money_earned_per_enemy
         self.living = True
 
-    def point_at_tower(self, board): # moving direction
-        tower = self.closest_tower()
+    def point_at_tower(self, board): # finds the closest defense tower and moves to it
+        tower = self.closest_tower() # finds closest defese tower
         if tower is not None:
             direction = (float(tower.position[0] - self.position[0]), float(tower.position[1] - self.position[1]))
             distance = calc_distance(self.position, tower.position)
-            new_orientation = (direction[0]/distance, direction[1]/distance) 
+            new_orientation = (direction[0]/distance, direction[1]/distance)
+            # rotates dragon based on direction of motion
             rotate_angle = angle(new_orientation, self.orientation)
-            if rotate_angle > 1:
+            if rotate_angle > 3:
                 if rotate_angle >=90 and rotate_angle <180:
                     if new_orientation[0] <0 :
                         self.image = pygame.transform.rotate(self.image,180-rotate_angle)
@@ -1371,16 +1358,11 @@ class Dragons(Game_obj):
                         self.image = pygame.transform.rotate(self.image,180-rotate_angle)
                     else:
                         self.image = pygame.transform.rotate(self.image,-180+rotate_angle)
-            # knights have to rotate too much
-##            rotate_angle = angle(new_orientation, self.orientation)
-##            if rotate_angle > 1:
-##                self.image = pygame.transform.rotate(self.image, rotate_angle)
             self.dx = int(self.speed_level*(new_orientation[0]))
             self.dy = int(self.speed_level*(new_orientation[1]))
             self.orientation = new_orientation
 
-    def closest_tower(self):
-        t_position = None
+    def closest_tower(self): # finds closest defense tower, if none exists, attacks main tower
         final_tower = None
         closest_distance = MAP_SIZE[1]
         for tower in self.board.towers:
@@ -1389,37 +1371,31 @@ class Dragons(Game_obj):
             distance = calc_distance(self.position, tower.position)
             if distance < closest_distance:
                 closest_distance = distance
-                t_position = tower.position
                 final_tower = tower
-        if t_position != None:
+        if final_tower != None:
             return final_tower
         else:
             return self.board.base_tower
-        return False
-        
-    def set_new_speed(self,new_level):
-        self.speed_level = 1*new_level
 
-    def attack(self, collision, board):
+    def attack(self, collision, board): # attacks tower with which it is colliding
         collision.HP -= self.attack_power
-        if collision.HP <= 0:
+        if collision.HP <= 0: # if tower HP = 0 kills tower
             collision.death(board)
 
-    def death(self, board):
-        # need to remove the object from the board
-        # from dic list
+    def death(self, board): # removes the dragon if it dies
+        # used to associate dragon with corresponding lifebar
         time = self.time
         self.living = False
-        board.dragon_dict[time] = None
         lifebar = board.lifebar_dict[time]
-        lifebar.kill()
+        # removes the dragon and lifebar from dictionaries
+        board.dragon_dict[time] = None
         board.lifebar_dict[time] = None
+        # removes dragon and lifebar from sprite groups they are in
+        lifebar.kill()
         self.kill()
-        self.update()
-        lifebar.update()
         return self.money_earned_per_enemy
         
-    def touching_defense_or_base_tower(self, board):
+    def touching_defense_or_base_tower(self, board): # checks if dragon has collided with tower
         collision_tower = pygame.sprite.spritecollideany(self, board.towers, collided=None)
         if collision_tower is not None:
             self.dx = 0
@@ -1427,56 +1403,46 @@ class Dragons(Game_obj):
             return collision_tower
         return None
 
-    def touching_another_dragon(self, board):
+    def touching_another_dragon(self, board): # finds if dragon is hitting another dragon, tries to escape if true
         sprite_group_without_self = board.dragons.copy()
-        
         sprite_group_without_self.remove(self)
-        collision = pygame.sprite.spritecollideany(self, sprite_group_without_self, collided=None)
 
+        collision = pygame.sprite.spritecollideany(self, sprite_group_without_self, collided=None) # checks if it collides with other knights
         if collision is not None or (self.dx,self.dy) == (0,0):
-
             collision = True
-
+            # picks from 8 different directions in a certain range to find the closest possible movement that lets it escape collision
             for escape_speed_multiplier in range(1,20):
-                
                 directions = [(0,escape_speed_multiplier*int(self.speed_level*-0.5)),(escape_speed_multiplier*int(self.speed_level*0.5),0),
                               (0,escape_speed_multiplier*int(self.speed_level*0.5)),(escape_speed_multiplier*int(self.speed_level*-0.5),0),
                               (escape_speed_multiplier*int(self.speed_level*-0.5),escape_speed_multiplier*int(self.speed_level*-0.5)),
                               (escape_speed_multiplier*int(self.speed_level*0.5),escape_speed_multiplier*int(self.speed_level*0.5)),
                               (escape_speed_multiplier*int(self.speed_level*-0.5),escape_speed_multiplier*int(self.speed_level*0.5)),
                               (escape_speed_multiplier*int(self.speed_level*0.5),escape_speed_multiplier*int(self.speed_level*-0.5))]
+                random.shuffle(directions) # randomises the directions that are attempted for escape
 
-                random.shuffle(directions)
-
-                for (dx,dy) in directions:
-
+                for (dx,dy) in directions: # tests moving in the direction chosen
                     self.rect = self.rect.move(dx,dy)
-
                     collision_in_new_path = pygame.sprite.spritecollideany(self, sprite_group_without_self, collided=None)
-
-                    if collision_in_new_path is None:
-                        self.rect = self.rect.move(-dx,-dy)
-                        (self.dx,self.dy) = (dx,dy)
+                    if collision_in_new_path is None: # if there is no collision in the direction chosen
+                        self.rect = self.rect.move(-dx,-dy) # move back to original position, to be moved later on
+                        (self.dx,self.dy) = (dx,dy) # define new direction which will avoid collision
                         break
 
-                    self.rect = self.rect.move(-dx,-dy)
+                    self.rect = self.rect.move(-dx,-dy) # if the direction chosen also has a collision, move back to original position
 
-                if collision_in_new_path is None:
+                if collision_in_new_path is None: # breaks out of the outer loop if a suitable direction is found
                     break
 
-                if collision_in_new_path is not None:
-                    (self.dx,self.dy) = (0,0)
+            if collision_in_new_path is not None: # if there is no movement within 20 pixels that produces no collision, stays at rest
+                (self.dx,self.dy) = (0,0)
 
         return collision
 
-    def update(self):
-        # add in angles from find direction to base tower
-#        self.rect.x += self.dx
-#        self.rect.y += self.dy
+    def update(self): # moves dragon
         self.rect = self.rect.move(self.dx,self.dy)
         self.position = self.rect.center
         
-class User_Score(object):
+class User_Score(object): # creates an object to efficiently keep track of username and score
     def __init__(self, name, score):
         self.name = name
         self.score = score
@@ -1484,4 +1450,4 @@ class User_Score(object):
     def __repr__(self):
         return '{}: {}'.format(self.name, self.score)
         
-start_game()
+start_game() # starts the game!

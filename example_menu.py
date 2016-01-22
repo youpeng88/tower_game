@@ -102,7 +102,7 @@ def main(screen):
          elif state == 1:
             print 'Start Game!'
             state = 0
-            return 
+            return 1
          elif state == 2:
             print 'Load Game!'
             state = 0
